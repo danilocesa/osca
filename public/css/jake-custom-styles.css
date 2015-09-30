@@ -1,0 +1,44 @@
+/***************DIV************/
+#vb_page_head{
+	float: right;
+	margin: 1% 10% 0 0;
+}
+
+#vb_alpha{
+	float: left;
+	margin: 3% 0% 0 6%;
+}
+
+#vb_head_controls{
+	float: left;
+	margin : 3% 0 0 1%;	
+}
+
+#vb_head{
+	height : 600px;
+}
+
+#vb_head_drop{
+	float: right;
+	margin: 2.7% -25% 0% 0%;
+}
+
+#vb_foot_pgn8{
+	float: right;
+	margin: 1% 10% 0 0;
+}
+
+#vb_foot_drop{
+	float: right;
+	margin: 2.7% -25% 0 0;
+}
+
+/*********tr***************/
+
+tr:nth-child(odd){
+	background-color: #F0F0F0;
+}
+
+tr:nth-child(even){
+	background-color: #ffffff;
+}

@@ -9,7 +9,7 @@ table.table tbody td {
 }
 div.list{
   border:solid 1px #ccc;
-  height:400px;
+  height:450px;
   padding:10px;
   overflow:auto;
 }

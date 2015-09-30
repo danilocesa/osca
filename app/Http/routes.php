@@ -27,4 +27,7 @@ Route::get('/', function () {
 Route::group(['middleware' => ['auth']], function(){
 	Route::controller('product', 'ProductController');
 	Route::controller('category', 'CategoryController');
+	Route::controller('brand', 'BrandController');
+	Route::controller('user', 'UserController');
+	Route::controller('role', 'RoleController');
 });
