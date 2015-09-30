@@ -223,3 +223,11 @@
 		</tbody>
 	</table>
 @endsection
+
+@section('scripts')
+<script>
+	$(document).ready(function(){
+		
+	});
+</script>	
+@endsection

@@ -26,4 +26,5 @@ Route::get('/', function () {
 
 Route::group(['middleware' => ['auth']], function(){
 	Route::controller('product', 'ProductController');
+	Route::controller('category', 'CategoryController');
 });
