@@ -150,6 +150,12 @@ return [
         App\Providers\AuthServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+		
+		/*
+		 * Oracle OCI8
+		*/
+		
+		yajra\Oci8\Oci8ServiceProvider::class,
 
     ],
 

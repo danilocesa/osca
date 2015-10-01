@@ -115,7 +115,7 @@ tr.category-item, tr.subcategory-item{
 		<td colspan="2">
 			<form class="form-inline" id="add-world-form" action="{{ url('category/add-world') }}" method="post">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" name="world_name" placeholder="World name"/>
+				<input class="form-control" type="text" id="world_name" name="world_name" placeholder="World name"/>
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-world cancel-add-btn btn btn-default btn-xs" value="Cancel">
 			</form>
@@ -129,7 +129,7 @@ tr.category-item, tr.subcategory-item{
 			<form class="form-inline" id="edit-world-form" action="{{ url('category/edit-world') }}/@{{ world_id }}" method="post">
 				<input type="hidden" name="_method" value="PUT">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" name="world_name" value="@{{ world_name }}"/>
+				<input class="form-control" type="text" id="world_name" name="world_name" value="@{{ world_name }}"/>
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-world cancel-edit-btn btn btn-default btn-xs" data-wn="@{{ world_name }}" data-wid="@{{ world_id }}" value="Cancel">
 			</form>
@@ -142,7 +142,7 @@ tr.category-item, tr.subcategory-item{
 		<td colspan="2">
 			<form class="form-inline" id="add-category-form" action="{{ url('category/add-category') }}/@{{ world_id }}" method="post">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" name="category_name" placeholder="Category name"/>
+				<input class="form-control" type="text" id="category_name" name="category_name" placeholder="Category name"/>
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-category cancel-add-btn btn btn-default btn-xs" value="Cancel">
 			</form>
@@ -156,7 +156,7 @@ tr.category-item, tr.subcategory-item{
 			<form class="form-inline" id="edit-category-form" action="{{ url('category/edit-category') }}/@{{ world_id }}/@{{ category_id }}" method="post">
 				<input type="hidden" name="_method" value="PUT">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" name="category_name" value="@{{ category_name }}"/>
+				<input class="form-control" type="text" id="category_name" name="category_name" value="@{{ category_name }}"/>
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-category cancel-edit-btn btn btn-default btn-xs" data-cn="@{{ category_name }}" data-wid="@{{ world_id }}" data-cid="@{{ category_id }}" value="Cancel">
 			</form>
@@ -169,7 +169,7 @@ tr.category-item, tr.subcategory-item{
 		<td colspan="2">
 			<form class="form-inline" id="add-subcategory-form" action="{{ url('category/add-subcategory') }}/@{{ category_id }}" method="post">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" name="subcategory_name" placeholder="Subcategory name"/>
+				<input class="form-control" type="text" id="subcategory_name" name="subcategory_name" placeholder="Subcategory name"/>
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-subcategory cancel-add-btn btn btn-default btn-xs" value="Cancel">
 			</form>
@@ -183,7 +183,7 @@ tr.category-item, tr.subcategory-item{
 			<form class="form-inline" id="edit-subcategory-form" action="{{ url('category/edit-subcategory') }}/@{{ category_id }}/@{{ subcategory_id }}" method="post">
 				<input type="hidden" name="_method" value="PUT">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" name="subcategory_name" value="@{{ subcategory_name }}"/>
+				<input class="form-control" type="text" id="subcategory_name" name="subcategory_name" value="@{{ subcategory_name }}"/>
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-subcategory cancel-edit-btn btn btn-default btn-xs" data-scn="@{{ subcategory_name }}" data-cid="@{{ category_id }}" data-scid="@{{ subcategory_id }}" value="Cancel">
 			</form>
@@ -370,137 +370,56 @@ $(document).ready(function(){
 	// AJAX Forms
 	$(document).on("submit", "form#add-world-form", function(event){
 		event.preventDefault();
-		
 		var $form = $(this);
-		
-		submitAjaxForm($form, function(){
-			var json = JSON.parse(data);
-			$worldTable.append(tmpWorldItem(json));
+		submitAjaxForm($form, function(data){
+			$worldTable.append(tmpWorldItem(data));
 			$form.parent().parent().remove();
 			$(".add-world").show();
 		});
-		
-		/*$.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(data) {				
-                var json = JSON.parse(data);
-				$worldTable.append(tmpWorldItem(json));
-				$form.parent().parent().remove();
-				$(".add-world").show();
-            },
-			error : function(data) {
-				var json = JSON.parse(data.responseJSON);
-				for (var item in json){
-					$form.find("input[name=\"" + item + "\"]").formError(json[item][0]);
-				}
-			}
-        });*/
 	});
 	
 	$(document).on("submit", "form#edit-world-form", function(event){
 		event.preventDefault();
-			
 		var $form = $(this);
-	
-		$.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(data) {				
-                var json = JSON.parse(data);
-				$form.parent().parent().after(tmpWorldItem(json)).remove();	
-            },
-			error : function(data) {
-				var json = JSON.parse(data.responseJSON);
-				alert(json.world_name);
-			}
-        });
+		submitAjaxForm($form, function(data){
+			$form.parent().parent().after(tmpWorldItem(data)).remove();
+		});
 	});
 	
 	$(document).on("submit", "form#add-category-form", function(event){
 		event.preventDefault();
-			
 		var $form = $(this);
-	
-		$.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(data) {				
-                var json = JSON.parse(data);
-				$categoryTable.append(tmpCategoryItem(json));
-				$form.parent().parent().remove();
-				$(".add-category").show();
-            },
-			error : function(data) {
-				var json = JSON.parse(data.responseJSON);
-				alert(json.category_name);
-			}
-        });
+		submitAjaxForm($form, function(data){
+			$categoryTable.append(tmpCategoryItem(data));
+			$form.parent().parent().remove();
+			$(".add-category").show();
+		});
 	});
 
 	$(document).on("submit", "form#edit-category-form", function(event){
 		event.preventDefault();
-	
 		var $form = $(this);
-	
-		$.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(data) {				
-                var json = JSON.parse(data);
-				$form.parent().parent().after(tmpCategoryItem(json)).remove();	
-            },
-			error : function(data) {
-				var json = JSON.parse(data.responseJSON);
-				alert(json.category_name);
-			}
-        });
+		submitAjaxForm($form, function(data){
+			$form.parent().parent().after(tmpCategoryItem(data)).remove();	
+		});
 	});
 	
 	$(document).on("submit", "form#add-subcategory-form", function(event){
 		event.preventDefault();
-	
 		var $form = $(this);
-	
-		$.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(data) {				
-                var json = JSON.parse(data);
-				$subcategoryTable.append(tmpSubcategoryItem(json));
-				$form.parent().parent().remove();
-				$(".add-subcategory").show();
-            },
-			error : function(data) {
-				var json = JSON.parse(data.responseJSON);
-				alert(json.subcategory_name);
-			}
-        });
+		submitAjaxForm($form, function(data){
+			$subcategoryTable.append(tmpSubcategoryItem(data));
+			$form.parent().parent().remove();
+			$(".add-subcategory").show();	
+		});
 	});
 
 	$(document).on("submit", "form#edit-subcategory-form", function(event){
 		event.preventDefault();
-	
 		var $form = $(this);
-	
-		$.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(data) {				
-                var json = JSON.parse(data);
-				$form.parent().parent().after(tmpSubcategoryItem(json)).remove();	
-            },
-			error : function(data) {
-				var json = JSON.parse(data.responseJSON);
-				alert(json.subcategory_name);
-			}
-        });
+		submitAjaxForm($form, function(data){
+			$form.parent().parent().after(tmpSubcategoryItem(data)).remove();	
+		});
 	});
 });
 </script>	

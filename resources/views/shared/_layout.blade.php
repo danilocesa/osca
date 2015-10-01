@@ -2,12 +2,9 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<title>OSCA Admin Control Panel - @yield('title')</title>	
 	{!! HTML::style('css/bootstrap.min.css') !!}
 	{!! HTML::style('css/nav-styles.css') !!}
-	{!! HTML::style('css/image-styles.css') !!}
-	{!! HTML::style('css/table-styles.css') !!}
 	@yield('styles')
 </head>
 <body>

@@ -5,9 +5,9 @@ function submitAjaxForm(form, successFunction) {
 		data: form.serialize(),
 		success: successFunction,
 		error : function(data) {
-			var json = JSON.parse(data.responseJSON);
+			var json = data.responseJSON;
 			for (var item in json){
-				form.find("input[name=\"" + item + "\"]").formError(json[item][0]);
+				form.find("#" + item).formError(json[item][0]);
 			}
 		}
 	});

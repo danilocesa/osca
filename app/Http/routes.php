@@ -11,19 +11,14 @@
 |
 */
 
-// Authentication routes...
-Route::get('auth/login', 'Auth\AuthController@getLogin');
-Route::post('auth/login', 'Auth\AuthController@postLogin');
-Route::get('auth/logout', 'Auth\AuthController@getLogout');
-
-// Registration routes...
-Route::get('auth/register', 'Auth\AuthController@getRegister');
-Route::post('auth/register', 'Auth\AuthController@postRegister');
+// Public routes
+Route::controller('auth', 'Auth\AuthController');
 
 Route::get('/', function () {
     return redirect('auth/login');
 });
 
+// Private routes
 Route::group(['middleware' => ['auth']], function(){
 	Route::controller('product', 'ProductController');
 	Route::controller('category', 'CategoryController');
@@ -31,3 +26,9 @@ Route::group(['middleware' => ['auth']], function(){
 	Route::controller('user', 'UserController');
 	Route::controller('role', 'RoleController');
 });
+
+// Display all SQL executed in Eloquent
+/*Event::listen('illuminate.query', function($query)
+{
+    var_dump($query);
+});*/
