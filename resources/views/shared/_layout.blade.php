@@ -19,6 +19,8 @@
 	{!! HTML::script('js/jquery.min.js') !!}
 	{!! HTML::script('js/bootstrap.min.js') !!}
 	{!! HTML::script('js/handlebars-v4.0.2.js') !!}
+	{!! HTML::script('js/jquery.formError.js') !!}
+	{!! HTML::script('js/jquery.ajaxFormCustom.js') !!}
 	@yield('scripts')	
 </body>
 </html>

@@ -276,7 +276,7 @@ $(document).ready(function(){
 	});
   
 	// Add new item button click
-	$(".add-item-btn").click(function(){
+	$(".add-item-btn").click(function(event){
 		event.preventDefault();
 		
 		if ($(this).hasClass("add-world")){
@@ -306,7 +306,7 @@ $(document).ready(function(){
 	});
 	
 	// Cancel add item button
-	$(document).on("click", ".cancel-add-btn", function(){
+	$(document).on("click", ".cancel-add-btn", function(event){
 		event.preventDefault();
 		
 		// Remove form, and show add button
@@ -368,10 +368,19 @@ $(document).ready(function(){
 	});
   
 	// AJAX Forms
-	$(document).on("submit", "form#add-world-form", function(){
+	$(document).on("submit", "form#add-world-form", function(event){
+		event.preventDefault();
+		
 		var $form = $(this);
-	
-		$.ajax({
+		
+		submitAjaxForm($form, function(){
+			var json = JSON.parse(data);
+			$worldTable.append(tmpWorldItem(json));
+			$form.parent().parent().remove();
+			$(".add-world").show();
+		});
+		
+		/*$.ajax({
             url: $(this).attr('action'),
             type: 'POST',
             data: $(this).serialize(),
@@ -383,13 +392,16 @@ $(document).ready(function(){
             },
 			error : function(data) {
 				var json = JSON.parse(data.responseJSON);
-				alert(json.world_name);
+				for (var item in json){
+					$form.find("input[name=\"" + item + "\"]").formError(json[item][0]);
+				}
 			}
-        });
-		event.preventDefault();
+        });*/
 	});
 	
-	$(document).on("submit", "form#edit-world-form", function(){
+	$(document).on("submit", "form#edit-world-form", function(event){
+		event.preventDefault();
+			
 		var $form = $(this);
 	
 		$.ajax({
@@ -405,10 +417,11 @@ $(document).ready(function(){
 				alert(json.world_name);
 			}
         });
-		event.preventDefault();
 	});
 	
-	$(document).on("submit", "form#add-category-form", function(){
+	$(document).on("submit", "form#add-category-form", function(event){
+		event.preventDefault();
+			
 		var $form = $(this);
 	
 		$.ajax({
@@ -426,10 +439,11 @@ $(document).ready(function(){
 				alert(json.category_name);
 			}
         });
-		event.preventDefault();
 	});
 
-	$(document).on("submit", "form#edit-category-form", function(){
+	$(document).on("submit", "form#edit-category-form", function(event){
+		event.preventDefault();
+	
 		var $form = $(this);
 	
 		$.ajax({
@@ -445,10 +459,11 @@ $(document).ready(function(){
 				alert(json.category_name);
 			}
         });
-		event.preventDefault();
 	});
 	
-	$(document).on("submit", "form#add-subcategory-form", function(){
+	$(document).on("submit", "form#add-subcategory-form", function(event){
+		event.preventDefault();
+	
 		var $form = $(this);
 	
 		$.ajax({
@@ -466,10 +481,11 @@ $(document).ready(function(){
 				alert(json.subcategory_name);
 			}
         });
-		event.preventDefault();
 	});
 
-	$(document).on("submit", "form#edit-subcategory-form", function(){
+	$(document).on("submit", "form#edit-subcategory-form", function(event){
+		event.preventDefault();
+	
 		var $form = $(this);
 	
 		$.ajax({
@@ -485,7 +501,6 @@ $(document).ready(function(){
 				alert(json.subcategory_name);
 			}
         });
-		event.preventDefault();
 	});
 });
 </script>	

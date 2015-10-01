@@ -24,15 +24,9 @@ class CategoryController extends Controller
 	{
 		if ($request->ajax()){
 			$service = new OSCAService();
-			$response = $service->addWorld([
-				'world_name' => $request->input('world_name')
-			]);
+			$response = $service->addWorld($request->only(['world_name']));
 			
-			if ($response['status'] == 200) {
-				return $response['data'];
-			} else if ($response['status'] == 422){
-				return response()->json($response['data'], 422);
-			}
+			return response()->json($response['data'], $response['status']);
 		}
 	}
 	
@@ -40,15 +34,9 @@ class CategoryController extends Controller
 	{
 		if ($request->ajax()){
 			$service = new OSCAService();
-			$response = $service->editWorld($world_id, [
-				'world_name' => $request->input('world_name')
-			]);
+			$response = $service->editWorld($request->only(['world_name']));
 			
-			if ($response['status'] == 200) {
-				return $response['data'];
-			} else if ($response['status'] == 422){
-				return response()->json($response['data'], 422);
-			}
+			return response()->json($response['data'], $response['status']);
 		}
 	}
 	
@@ -56,15 +44,9 @@ class CategoryController extends Controller
 	{
 		if ($request->ajax()){
 			$service = new OSCAService();
-			$response = $service->addCategory($world_id, [
-				'category_name' => $request->input('category_name')
-			]);
+			$response = $service->addCategory($world_id, $request->only(['category_name']));
 			
-			if ($response['status'] == 200) {
-				return $response['data'];
-			} else if ($response['status'] == 422){
-				return response()->json($response['data'], 422);
-			}
+			return response()->json($response['data'], $response['status']);
 		}
 	}
 	
@@ -72,15 +54,9 @@ class CategoryController extends Controller
 	{
 		if ($request->ajax()){
 			$service = new OSCAService();
-			$response = $service->editCategory($world_id, $category_id, [
-				'category_name' => $request->input('category_name')
-			]);
+			$response = $service->editCategory($world_id, $category_id, $request->only(['category_name']));
 			
-			if ($response['status'] == 200) {
-				return $response['data'];
-			} else if ($response['status'] == 422){
-				return response()->json($response['data'], 422);
-			}
+			return response()->json($response['data'], $response['status']);
 		}
 	}
 	
@@ -88,15 +64,9 @@ class CategoryController extends Controller
 	{
 		if ($request->ajax()){
 			$service = new OSCAService();
-			$response = $service->addSubcategory($category_id, [
-				'subcategory_name' => $request->input('subcategory_name')
-			]);
+			$response = $service->addSubcategory($category_id, $request->only(['subcategory_name']));
 			
-			if ($response['status'] == 200) {
-				return $response['data'];
-			} else if ($response['status'] == 422){
-				return response()->json($response['data'], 422);
-			}
+			return response()->json($response['data'], $response['status']);
 		}
 	}
 	
@@ -104,15 +74,9 @@ class CategoryController extends Controller
 	{
 		if ($request->ajax()){
 			$service = new OSCAService();
-			$response = $service->editSubcategory($category_id, $subcategory_id, [
-				'subcategory_name' => $request->input('subcategory_name')
-			]);
+			$response = $service->editSubcategory($category_id, $subcategory_id, $request->only(['subcategory_name']));
 			
-			if ($response['status'] == 200) {
-				return $response['data'];
-			} else if ($response['status'] == 422){
-				return response()->json($response['data'], 422);
-			}
+			return response()->json($response['data'], $response['status']);
 		}
 	}
 }
