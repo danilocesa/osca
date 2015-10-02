@@ -9,8 +9,7 @@
 </head>
 <body>
 	@include('shared._nav')
-	<div class="container">
-		<h3>@yield('title')</h3>
+	<div class="container-fluid">
 		@yield('content')
 	</div>
 	{!! HTML::script('js/jquery.min.js') !!}

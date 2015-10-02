@@ -10,6 +10,7 @@ class BrandController extends Controller
 {
     public function getIndex()
 	{
-		return view('brand.index');
+		$brand=\App\Brand::paginate(10);
+		return view('brand.index',['brands'=> $brand ]);
 	}
 }

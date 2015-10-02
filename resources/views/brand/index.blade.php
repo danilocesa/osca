@@ -80,7 +80,7 @@
 					</div>
 		    </div>		  
 		  <div class="page-body">			
-		  </div>		  
+		  </div>		
 		  <table class="table">
 			  <!---->
 			  <div class="row">
@@ -90,46 +90,31 @@
 				<th>Products</th>
 				<th></th>
 			  </tr>
+			  </div>
+			  <div class="row">
 			  <tr>
 				  <td class="col-sm-1" align="center">
-					<input type="checkbox" aria-label="..." />				  
+					<input type="checkbox" name="check[]" />				  
 				  </td>
 				  <td class="col-sm-5">Adventure Time</td>     
 				  <td class="col-sm-4">11</td>     
 				  <td class="col-sm-2"><a href="#">Edit</a></td>     
 			  </tr>
 			  </div>
+			  @foreach($brands as $brand)
 			  <div class="row">
 			  <tr>
-				  <td class="col-sm-1" align="center">					
-					<input type="checkbox" aria-label="..." />
-				  </>			  
-				  <td class="col-sm-5">American Tourister</td>     
-				  <td class="col-sm-4">2</td>     
+				<td class="col-sm-1" align="center">
+					<input type="checkbox" name="check[]" />				  
+				  </td>
+				  <td class="col-sm-5">{{$brand->brand_name}}</td>     
+				  <td class="col-sm-4">11</td>     
 				  <td class="col-sm-2"><a href="#">Edit</a></td>     
 			  </tr>
 			  </div>
-			  <div class="row">
-				<tr>
-				<td class="col-sm-1" align="center">					
-					<input type="checkbox" aria-label="..." />	</td>			  
-				  <td class="col-sm-5">Avengers Assemble</td>     
-				  <td class="col-sm-4">5</td>     
-				  <td class="col-sm-2"><a href="#">Edit</a></td>     				
-				</tr>
-			  </div>							  
-			  <div class="row">
-				<tr>
-				  <td class="col-sm-1" align="center">					
-					<input type="checkbox" aria-label="..." />
-				  </td>			  
-				  <td class="col-sm-5">Ayla</td>     
-				  <td class="col-sm-4">64</td>     
-				  <td class="col-sm-2"><a href="#">Edit</a></td>     
-				</tr>
-			  </div>		  
+			  @endforeach
 		</table>
-	</div>
+	</div>	
 	<div name="foot" id="vb_foot">
 		<div id="vb_foot_pgn8">
 			<nav>

@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $table = 'product';
-	
 	protected $primaryKey = 'product_id';
 	
 	public function brandEs()
@@ -18,5 +16,10 @@ class Product extends Model
 	public function brandMms()
 	{
 		return $this->belongsTo('\App\Brand', 'brand_id_mms', 'brand_id');
+	}
+	
+	public function variations()
+	{
+		return $this->hasMany('\App\ProductVariation', 'model_code', 'model_code');
 	}
 }
