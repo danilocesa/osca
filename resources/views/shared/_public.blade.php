@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>OSCA Admin Control Panel - @yield('title')</title>
+	<title>@yield('title') - OSCA Product Module</title>
 	{!! HTML::style('css/bootstrap.min.css') !!}
 	@yield('styles')
 </head>

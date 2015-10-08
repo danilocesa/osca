@@ -3,8 +3,7 @@
 @section('title', 'Products')
 
 @section('styles')
-	{!! HTML::style('css/image-styles.css') !!}
-	{!! HTML::style('css/table-styles.css') !!}
+	{!! HTML::style('css/product-index-styles.css') !!}
 	<style>
 	tr.product-parent td{
 		vertical-align:middle !important;
@@ -29,27 +28,13 @@
 @endsection
 
 @section('content')
-	<div class="row">
-		<div class="col-md-6">
-			<form class="form-inline">
-				<select class="form-control input-sm">
-					<option value="" disabled selected>Chooce action</option>
-					<option value="opt1">Bulk Edit</option>
-					<option value="opt2">Export to CSV</option>
-				</select>
-				<input class="btn btn-default btn-sm" type="submit" value="Go"/>
-			</form>
-		</div>
-		<div class="col-md-6 text-right">
-			{!! str_replace('/?', '?', $products->render()) !!}
-		</div>
-	</div>
 	<table class="table table-condensed table-striped">
 		<thead>
 			<th></th>
 			<th>Image</th>
 			<th>Model Code</th>
 			<th>SKU Barcode</th>
+			<th>Environment Code</th>
 			<th>Brand</th>
 			<th width="300">Product Name</th>
 			<th>Inventory</th>
@@ -66,34 +51,32 @@
 						<td>{!! HTML::image('images/products/sample.jpg', null, ['class' => 'product-img-main']) !!}</td>
 						<td>{{ $item['model_code'] }}</td>
 						<td></td>
+						<td></td>
 						<td>{{ $item['brand_name'] }}</td>
 						<td>{{ $item['product_name'] }}</td>
 						<td></td>				
-						<td>{{ $item['sku_price'] }}</td>
+						<td></td>
 						<td></td>
 						<td></td>
 						<td class="text-center">
-							<a href="#" title="Preview">Preview</a><br/>
-							<a href="#" title="Edit">Edit</a><br/>
+							<a href="{{ url('product/edit/' . $item['model_code']) }}" title="Edit">Edit</a><br/>
 							<a href="#" title="Log">Log</a>
 						</td>
 					</tr>
 					@foreach($item['variations'] as $variation)
-						<tr class="product-child" data-mc="{{ $item['model_code'] }}" data-pid="{{ $variation['product_id'] }}">
+						<tr class="product-child" data-mc="{{ $item['model_code'] }}">
 							<td></td>
 							<td></td>
 							<td>{!! HTML::image('images/products/sample.jpg', null, ['class' => 'product-img-main']) !!}</td>
 							<td>{{ $variation['sku_barcode'] }}</td>
+							<td>{{ $variation['environment_code'] }}</td>
 							<td></td>
-							<td>{{ $variation['variations'] }}</td>
+							<td>{{ $variation['variation_name'] }}</td>
 							<td>{{ $variation['inventory'] }}</td>
-							<td>{{ $variation['price'] }}</td>
+							<td>{{ $variation['sku_price'] }}</td>
 							<td class="text-center"><span {!! $variation['enable'] ? 'class="glyphicon glyphicon-ok"' : 'class="glyphicon glyphicon-remove"' !!}></span></td>
 							<td>{{ $variation['status_name'] }}</td>
-							<td class="text-center">
-								<a href="#" title="Edit">Edit</a><br/>
-								<a href="#" title="Log">Log</a>
-							</td>
+							<td></td>
 						</tr>
 					@endforeach
 				@else
@@ -102,6 +85,7 @@
 						<td>{!! HTML::image('images/products/sample.jpg', null, ['class' => 'product-img-main']) !!}</td>
 						<td>{{ $item['model_code'] }}</td>
 						<td>{{ $item['sku_barcode'] }}</td>
+						<td>{{ $item['environment_code'] }}</td>
 						<td>{{ $item['brand_name'] }}</td>
 						<td>{{ $item['product_name'] }}</td>
 						<td>{{ $item['inventory'] }}</td>				
@@ -109,8 +93,7 @@
 						<td class="text-center"><span {!! $item['enable'] ? 'class="glyphicon glyphicon-ok"' : 'class="glyphicon glyphicon-remove"' !!}></span></td>
 						<td>{{ $item['status'] }}</td>
 						<td class="text-center">
-							<a href="#" title="Preview">Preview</a><br/>
-							<a href="#" title="Edit">Edit</a><br/>
+							<a href="{{ url('product/edit/' . $item['model_code']) }}" title="Edit">Edit</a><br/>
 							<a href="#" title="Log">Log</a>
 						</td>
 					</tr>

@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>OSCA Admin Control Panel - @yield('title')</title>	
+	<title>@yield('title') - OSCA Product Module</title>	
 	{!! HTML::style('css/bootstrap.min.css') !!}
-	{!! HTML::style('css/nav-styles.css') !!}
+	{!! HTML::style('css/select2.min.css') !!}
+	{!! HTML::style('css/select2-bootstrap.css') !!}
+	{!! HTML::style('css/bootstrap-override.css') !!}
 	@yield('styles')
 </head>
 <body>
@@ -17,6 +19,7 @@
 	{!! HTML::script('js/handlebars-v4.0.2.js') !!}
 	{!! HTML::script('js/jquery.formError.js') !!}
 	{!! HTML::script('js/jquery.ajaxFormCustom.js') !!}
+	{!! HTML::script('js/select2.min.js') !!}
 	@yield('scripts')	
 </body>
 </html>

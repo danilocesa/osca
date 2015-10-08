@@ -24,7 +24,6 @@ Route::group(['middleware' => ['auth']], function(){
 	Route::controller('category', 'CategoryController');
 	Route::controller('brand', 'BrandController');
 	Route::controller('user', 'UserController');
-	Route::controller('role', 'RoleController');
 });
 
 // Display all SQL executed in Eloquent

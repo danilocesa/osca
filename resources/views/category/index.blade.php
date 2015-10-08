@@ -54,7 +54,6 @@ tr.category-item, tr.subcategory-item{
 	<br />
 	<div class="text-right">
 		<a href="#" class="add-world add-item-btn btn btn-default btn-sm">Add new world</a>
-		<a href="#" class="btn btn-default btn-sm">Move products</a>
 	</div>
 </div>
 <div class="col-md-4">
@@ -79,7 +78,6 @@ tr.category-item, tr.subcategory-item{
 	<br />
 	<div class="text-right">
 		<a href="#" class="add-category add-item-btn btn btn-default btn-sm">Add new category</a>
-		<a href="#" class="btn btn-default btn-sm">Move products</a>
 	</div>
 </div>
 <div class="col-md-4">

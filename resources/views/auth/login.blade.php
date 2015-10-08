@@ -13,7 +13,7 @@
 					<h1>OSCA</h1>
 				</div>
 				<div class="col-md-7">
-					<h3>Online Store Central Application Server</h3>
+					<h3>Online Store Central Application Product Module</h3>
 				</div>
 			</div>
 		</div>

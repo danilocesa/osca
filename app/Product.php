@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-	protected $primaryKey = 'product_id';
+	protected $primaryKey = 'model_code';
+	
+	protected $table = 'es_item_master';
+	
+	public $timestamps = false;
 	
 	public function brandEs()
 	{
@@ -20,6 +24,21 @@ class Product extends Model
 	
 	public function variations()
 	{
-		return $this->hasMany('\App\ProductVariation', 'model_code', 'model_code');
+		return $this->hasMany('\App\Variation', 'model_code', 'model_code');
+	}
+	
+	public function variationsView()
+	{
+		return $this->hasMany('\App\VariationView', 'model_code', 'model_code');
+	}
+	
+	public function primaryVariation()
+	{
+		return $this->hasOne('\App\Variation', 'model_code', 'primary_variation');
+	}
+	
+	public function categories()
+	{
+		return $this->belongsToMany('\App\Subcategory', 'es_item_categories', 'model_code');
 	}
 }

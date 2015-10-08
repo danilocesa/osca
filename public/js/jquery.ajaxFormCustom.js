@@ -5,6 +5,7 @@ function submitAjaxForm(form, successFunction) {
 		data: form.serialize(),
 		success: successFunction,
 		error : function(data) {
+			console.debug(data);
 			var json = data.responseJSON;
 			for (var item in json){
 				form.find("#" + item).formError(json[item][0]);
