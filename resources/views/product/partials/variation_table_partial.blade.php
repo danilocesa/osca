@@ -15,12 +15,14 @@
 		<th class="es-color" width="10">Width</th>
 		<th class="es-color" width="10">Height</th>
 		<th class="mms-color" width="10">Stock<br/>Level</th>
+		@if(\Auth::user()->role->hasPermission("CAN_APPROVE_PRODUCT"))
 		<th class="es-color" width="10">Approve</th>
+		@endif
 	  </tr>
 	</thead>
 	<tbody>
 		@foreach($item['variations'] as $variation)
-			<tr>
+			<tr data-product-id="{{ $variation['product_id'] }}">
 				<td>
 					<div>
 						<input type="checkbox" name="enable[{{ $variation['product_id'] }}]" {{ $variation['enable'] ? 'checked' : null }} class="watch-variation-changes">
@@ -61,7 +63,13 @@
 					</div>
 				</td>
 				<td>{{ $variation['inventory'] }}</td>
-				<td><input type="checkbox" name="approved[{{ $variation['product_id'] }}]" {{ $variation['approved'] ? 'checked' : null }}></td>
+				@if(\Auth::user()->role->hasPermission("CAN_APPROVE_PRODUCT"))
+				<td>
+					<div>
+						<input type="checkbox" name="approved[{{ $variation['product_id'] }}]" {{ $variation['approved'] ? 'checked' : null }} class="watch-variation-changes">
+					</div>
+				</td>
+				@endif
 			</tr>
 		@endforeach
 	</tbody>

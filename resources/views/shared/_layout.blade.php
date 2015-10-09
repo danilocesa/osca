@@ -10,8 +10,9 @@
 	@yield('styles')
 </head>
 <body>
-	@include('shared._nav')
+	@include('shared._nav')	
 	<div class="container-fluid">
+		@include('shared._alert')
 		@yield('content')
 	</div>
 	{!! HTML::script('js/jquery.min.js') !!}

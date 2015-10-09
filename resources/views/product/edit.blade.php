@@ -12,6 +12,7 @@
 	{!! csrf_field() !!}
 	<input type="hidden" name="_method" value="PUT">
 	<input type="hidden" id="product_changed" name="product_changed" value="0">
+	<input type="hidden" id="submit_button_clicked" name="submit_button_clicked" value="">
 
 	<div class="row">
 		<div class="col-md-6">
@@ -101,19 +102,14 @@
 @section('scripts')
 {!! HTML::script('js/category-picker.js') !!}
 <script>
+
 	/*var selDiv = "";
 	var storedFiles = [];*/
 	var $productChanged = $("#product_changed");
+	var $submitButtons = $("#submit-buttons");
+	var $submitButtonClicked = $("#submit_button_clicked");
 	
 	$(document).ready(function() {
-	
-		/*$("#files").on("change", handleFileSelect);
-		
-		selDiv = $("#selectedFiles"); 
-		$("#myForm").on("submit", handleForm);
-		
-		$("body").on("click", ".selFile", removeFile);*/
-		
 		// Initialize category picker
 		initCategoryPicker();
 		
@@ -152,20 +148,89 @@
 		// Handling changes on product
 		$(document).on("change", ".watch-product-changes", function(event){
 			$productChanged.val(1);
+			$submitButtons.css("display", "inline-block");
 		});
 		
 		// Handling changes on product variation
 		$(document).on("change", ".watch-variation-changes", function(event){
-			$(this).parent().parent().parent().find("td:first-child > div > input.variation_changed").val(1)
+			$(this).parent().parent().parent().find("td:first-child > div > input.variation_changed").val(1);
+			$submitButtons.css("display", "inline-block");
 		});
 		
-		/*$(document).on("submit", "form#edit-product-form", function(event){
+		// Changing of primary variation (radio button)
+		$(document).on("change", ".color-variation", function(event){
+			
+		});
+		
+		// Show images for selected variation
+		$("table#variation-primary-table").on("click", "tr", function(event){
+			$("table#variation-primary-table tr.selected").removeClass("selected");
+			$(this).addClass("selected");
+			
+			$(".color-variation-images").hide();
+			$(".color-variation-images[data-code-display-id=\"" + $(this).attr("data-code-display-id") + "\"]").show();
+		});
+		
+		// Handling click of upload button
+		$(document).on("click", ".btn-upload", function(event){
+			
+		});
+		
+		// Handling click of one any submit button
+		$submitButtons.on("click", "a.btn-submit", function(event){
 			event.preventDefault();
+		
+			$submitButtonClicked.val($(this).attr("data-value"));
+			
+			if (confirm("Continue?"))
+				$("form#edit-product-form").submit();
+		});
+		
+		// Handling click of upload button
+		$(document).on("click", "a#btn-apply-package", function(event){
+			event.preventDefault();
+		
+			$("input[name^=\"weight\"]").val($("input#package_weight").val());
+			$("input[name^=\"width\"]").val($("input#package_width").val());
+			$("input[name^=\"length\"]").val($("input#package_depth").val());
+			$("input[name^=\"height\"]").val($("input#package_height").val());
+		});
+		
+		// Submit product details form
+		$(document).on("submit", "form#edit-product-form", function(event){
+			event.preventDefault();
+			
 			var $form = $(this);
 			submitAjaxForm($form, function(data){
-				console.log(data);
+				if (data.redirect == true){
+					document.location.href = "{{ url('product') }}";
+				} else {
+					// Reset state, hide submit buttons
+					$(".variation_changed").val(0);
+					$productChanged.val(0);					
+					$submitButtons.hide();
+					$("#top-alert").addClass("alert-success")
+						.find("span#message")
+						.html(data.message)
+						.parent()
+						.find("span#icon")
+						.addClass("glyphicon-ok")
+						.parent()
+						.fadeIn(100);
+					// Scroll to top
+					$('body,html').animate({
+						scrollTop: 0
+					}, 100);
+				}
 			});
-		});*/
+		});
+		
+		/*$("#files").on("change", handleFileSelect);
+		
+		selDiv = $("#selectedFiles"); 
+		$("#myForm").on("submit", handleForm);
+		
+		$("body").on("click", ".selFile", removeFile);*/
 	});
 		
 	/*function handleFileSelect(e) {

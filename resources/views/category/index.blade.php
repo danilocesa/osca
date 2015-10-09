@@ -35,7 +35,7 @@ tr.category-item, tr.subcategory-item{
 @section('content')
 <div class="row">
 <div class="col-md-4">
-	<h4>World</h4>
+	<h4 class="text-center">World</h4>
 	<div class="list">
 	<table id="world-table" class="table">
 	<tbody>
@@ -57,7 +57,7 @@ tr.category-item, tr.subcategory-item{
 	</div>
 </div>
 <div class="col-md-4">
-	<h4>Category</h4>
+	<h4 class="text-center">Category</h4>
 	<div class="list">
 	<table id="category-table" class="table">
 	<tbody>
@@ -81,7 +81,7 @@ tr.category-item, tr.subcategory-item{
 	</div>
 </div>
 <div class="col-md-4">
-	<h4>Subcategory</h4>
+	<h4 class="text-center">Subcategory</h4>
 	<div class="list">
 	<table id="subcategory-table" class="table">
 	<tbody>

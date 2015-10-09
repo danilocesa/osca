@@ -8,14 +8,41 @@
 @endsection
 
 @section('content')
+
+<div id="top_head">
+		<!--<button type="button" class="btn btn-primary delete-btn" data-toggle="modal" data-target=".bs-example-modal-lg">Large modal</button>		-->
+		<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+		  <div class="modal-dialog modal-lg">
+			<div class="modal-content" id="vb_div">
+			
+			</div>
+		  </div>
+		</div>
+</div>
+
 	<div class="panel panel-default" id="vb_head">
 		  <!-- Default panel contents -->
-		<form method="post" action="{{ url('users/delete') }}">
+		<form method="post" action="{{ url('user/delete') }}">
 			<div name="head">
 					<div class="btn-group" id="vb_head_controls"  style="margin: 20px 10px 0 10px;">
-						<button type="button" class="btn btn-default navbar-btn" onclick="window.location='{{ url('user/create') }}'">Add User</button>
+						<button type="button" class="btn btn-primary navbar-btn" onclick="window.location='{{ url('user/create') }}'">Add User</button>
 						{!! csrf_field() !!}
-						<button type="submit" class="btn btn-default navbar-btn" id="delete_user">Delete Selected</button>
+						<!--
+						<button type="submit" 
+								class="btn btn-default navbar-btn" 
+								id="delete_user">
+								Delete Selected
+						</button>
+						<button type="button" class="btn btn-danger btn-md navbar-btn delete-btn"
+                                data-toggle="modal" data-target="#modal-delete">
+                          <i class="fa fa-times-circle"></i>
+                          Delete
+                        </button>
+						-->
+						<button type="button" class="btn btn-danger navbar-btn delete-btn" 
+						        data-toggle="modal" 
+								data-target=".bs-example-modal-lg">Delete
+						</button>
 					</div>
 					<div id="vb_alpha">
 						<a href="#">#</a>
@@ -55,7 +82,7 @@
 		  <div class="page-body">			
 		  </div>		  
 		  <table class="table" id="user_table">
-			  <!---->
+			<thead>
 			  <div class="row">
 			  <tr style="background-color: #C0C0C0;">	
 				<th></th>
@@ -64,24 +91,40 @@
 				<th></th>
 			  </tr>
 			  </div>
-			  
+			</thead>
 			  <!-- fetch values from DB -->
-			  @foreach($users as $user)
-			  <div class="row">
-			    <tr>
-				  <td class="col-sm-1" align="center"><input type="checkbox" aria-label="..." /></td>
-					<td class="col-sm-5">{{$user->name}}</td>
-					<td class="col-sm-4">{{$user->role->role_name}}</td>
-					
-					<td class="col-sm-2">
-					  <a href="{{ url('user/edit/'. $user->id) }}">
-					    Edit
-					  </a>
-					</td>
-					
-				</tr>
-			  </div>
-			  @endforeach
+			<tbody>
+			  @if(!empty($users))
+			    @foreach($users as $user)
+			      <div class="row">
+			        <tr data-bid="{{ $user->id }}" data-val="{{ $user->name }}">
+				      <td class="col-sm-1" align="center">
+				        <input type="checkbox" name="check[]" 
+						       id="checks" value="{{ $user->id }}" 
+							   data-bn="{{ $user->name }}" 
+					    />
+				      </td>
+				      <td class="col-sm-5">{{$user->name}}</td>
+				      <td class="col-sm-4">{{$user->role->role_name}}</td>
+				      <td class="col-sm-2">
+				    	<a href="{{ url('user/edit/'. $user->id) }}">
+				    	  Edit
+				    	</a>
+				      </td>
+				    </tr>
+			      </div>
+			    @endforeach
+			  @else
+				  <div class="row">
+				  <tr>
+					<td class="col-sm-1" align="center">
+					  </td>
+					  <td class="col-sm-5">No Records found</td>     
+					  <td class="col-sm-4"></td>     
+					  <td class="col-sm-2"></td>     
+				  </tr>
+				  </div>
+			  @endif
 			  @if(!empty($errors->all()))
 				   <tr class="alert alert-danger">
 					 <td class="col-sm-1" align="center"></td>
@@ -89,7 +132,8 @@
 					 <td class="col-sm-4"></td>     
 					 <td class="col-sm-2"></td>     						
 				   </tr>
-			  @endif	
+			  @endif
+			</tbody>
 			 <!-- fetch values from DB -->
 		  </table>
 		</form>
@@ -97,8 +141,91 @@
 				{!! str_replace('/?', '?', $users->render()) !!}
 		</div>	
 	</div>
+
+	
 	<div name="foot" id="vb_foot" >
 		<div class="col-sm-6 text-left">
 		</div>			
 	</div>
+	
+@endsection
+
+@section('scripts')
+
+<script id="delete-user-template" type="text/x-handlebars-template">
+	<form action="{{ url('user/delete')}}" method="post">
+      <div class="modal-header btn-danger">
+        <button type="button" class="close" data-dismiss="modal"> 
+		  <span class="glyphicon glyphicon-remove" aria-hidden="true"> </span>
+		</button>
+        <h4 class="modal-title">Please Confirm</h4>
+      </div>
+	  <div class="modal-body">
+	    <p class="lead">
+		  Are you sure you want to delete selected record/s?
+		</p>
+	    <input type="hidden" name="_method" value="DELETE">
+	    {!! csrf_field() !!}
+		
+		<div class="list-group" id="modal_list"></div>
+		
+	  </div>
+	  <!--<div class="modal-footer">
+	    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+		<button type="submit" class="btn btn-danger" name="delete_users" value="YES">
+		  <i class="fa fa-times-circle"></i>Yes
+		</button>
+	  </div>-->
+	</form>
+</script>
+
+<script>
+	
+	var brandTable = $("table#user_table tbody");				
+	var user_modal= $("div#vb_div");
+	
+$(document).ready(function(){
+	
+	$(document).on("click", ".delete-btn", function(event){
+		event.preventDefault();				
+		var tmpDeleteBrandForm = Handlebars.compile($("#delete-user-template").html());
+		
+		user_modal.empty();		
+		user_modal.append(tmpDeleteBrandForm);	
+		
+		if($("input:checked").length)
+		{
+			brandTable.find("input[type|='checkbox']").each(function()
+		    {
+		    	if($(this).is(":checked"))
+				{
+		    		//data.push($(this).attr('value'));
+		    		//name.push($(this).attr('data-bn'));
+		    		user_modal.find("div#modal_list").append('<label class="list-group-item">'
+		    					  +$(this).attr('data-bn')
+		    					  +'<input type="hidden" name="deluser[]" value="'
+		    					  +$(this).attr('value')
+		    					  +'" /></label>'
+								  );
+		    	}
+		    });
+			user_modal.find("div#modal_list").append(
+			  '<div class="modal-footer">'
+			  +'<button type="button" class="btn btn-default" data-dismiss="modal">No</button>'
+			  +'<button type="submit" class="btn btn-danger" name="delete_users" value="YES">'
+		      +'<i class="fa fa-times-circle"></i>Yes</button>'
+			  +'</div>'
+			);
+		}else{
+			user_modal.find("div#modal_list").append('<label class="list-group-item">There are no selected records to be deleted.</label>'
+													  + '<div class="modal-footer"><button type="button" class="btn btn-primary" data-dismiss="modal">OK</button></div>'
+													);
+		}	
+	});
+	
+	
+});	
+
+</script>
+
 @endsection

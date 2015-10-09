@@ -1,5 +1,7 @@
 @extends('shared._public')
 
+@section('title', 'Log In')
+
 @section('styles')
 {!! HTML::style('css/login-styles.css') !!}
 @endsection

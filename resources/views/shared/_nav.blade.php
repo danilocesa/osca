@@ -17,11 +17,14 @@
 		<li {!! Request::is('product*') ? 'class="active"' : null !!}><a href="{{ url('product') }}">Products</a></li>
 		<li {!! Request::is('category*') ? 'class="active"' : null !!}><a href="{{ url('category') }}">Categories</a></li>
 		<li {!! Request::is('brand*') ? 'class="active"' : null !!}><a href="{{ url('brand') }}">Brands</a></li>
-		<li {!! Request::is('user*') ? 'class="active"' : null !!}><a href="{{ url('user') }}">Users</a></li>
+		
+		@if(\Auth::user()->role->hasPermission("CAN_MANAGE_USERS"))
+		<li {!! Request::is('user*') ? 'class="active"' : null !!}><a href="{{ url('user') }}">Users</a></li>		
+		@endif
       </ul>
 	  
       <ul class="nav navbar-nav navbar-right">
-		<li><p class="navbar-text">Signed in as: <a href="#" class="navbar-link"><strong>{{ Auth::user()->name }}</strong></a></p></li>
+		<li><p class="navbar-text">Signed in as: <a href="#" class="navbar-link"><strong>{{ Auth::user()->name }}</strong> / {{ \Auth::user()->role->role_name }}</a></p></li>
 		<li><a href="{{ url('auth/logout') }}">Log off</a></li> 
       </ul>
     </div><!-- /.navbar-collapse -->

@@ -235,6 +235,11 @@ textarea.textarea-customized-long {
 	height: 150px;
 }
 
+.vertical-scroll-only{
+	overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .alignment-custom-right {
 	float: right;
 }
@@ -332,4 +337,27 @@ table#variation-table tr td, table#variation-table th{
 .mms-color{
 	background:#667f84 !important;
 	color:white !important;
+}
+
+.color-variation-images{
+	display:none;
+}
+
+#submit-buttons{
+	display:none;
+}
+
+table#variation-primary-table th, table#variation-primary-table td{
+	font-size:0.75em;
+	text-align:center;
+	padding:0px;
+}
+table#variation-primary-table tr{
+	cursor:pointer;
+}
+table#variation-primary-table tr:hover{
+	outline:solid 1px #ccc;
+}
+tr.selected{
+	background:#aef !important;
 }

@@ -23,8 +23,8 @@
 <h3>Create User:</h3>
 
  <form method="post" action="{{ url('user\create') }}">
-	{{ csrf_field() }}
    <div class="panel panel-default panel-body">
+	{{ csrf_field() }}
 	<div>
 		<span style="color:red;">* </span>User Name : 
 		<input type="text" name="name" placeholder="User Name" value="{{ old('name') }}" class="form-control" /><br />
@@ -46,17 +46,19 @@
 	   <span style="color:red;">* </span>Role:
 	  </label>
 	    <select class="form-control" name="role_desc" style="width:150px; padding: 5px;">
+		  <option value=""></option>
         @foreach($roles as $role)
 		  <option value="{{$role->role_id}}">{{$role->role_name}}</option>
 		@endforeach
         </select>
-	</div><br />
-	
+	</div>
+   </div>
+   <div style="float:right;">
 	<input type="button" value="Cancel" onclick="window.location='{{ url('user/index') }}'" />
 	<input type="submit" value="Submit" />
-	
    </div>
  </form>
  
 </div>
+
 @endsection

@@ -26,15 +26,20 @@
 </div>
 	<div class="panel panel-default" id="vb_head">
 		  <!-- Default panel contents -->
-		  <form method="post" action="{{ url('brand/delete') }}">
 			<div name="head">			
 					<div class="btn-group" id="vb_head_controls">
-						<button type="button" class="btn btn-default add-brand-btn add-brand">Add Brand</button>						
-						{!! csrf_field() !!}
-						<button type="submit" class="btn btn-default" id="delete_brand">Delete Selected</button>
+						<button type="button" class="btn btn-primary add-brand-btn add-brand">Add Brand</button>						
+						<!--<button type="submit" class="btn btn-default" id="delete_brand">Delete Selected</button>-->
+						<button type="button" class="btn btn-danger delete-btn" data-toggle="modal" data-target=".bs-example-modal-lg">Delete selected</button>		
+						<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+						  <div class="modal-dialog modal-lg">
+							<div class="modal-content" id="vb_div">				
+							</div>
+						  </div>
+						</div>
 					</div>
 					<div id="vb_alpha">
-							<a href="#">#</a>
+							<!--<a href="#">#</a>-->
 							<a href="{{url('brand/index/A')}}">A</a>
 							<a href="{{url('brand/index/B')}}">B</a>
 							<a href="{{url('brand/index/C')}}">C</a>
@@ -61,7 +66,6 @@
 							<a href="{{url('brand/index/X')}}">X</a>
 							<a href="{{url('brand/index/Y')}}">Y</a>
 							<a href="{{url('brand/index/Z')}}">Z</a>
-						<a href="{{url('brand/index/_NONE')}}" style="border-left: 1px solid #ccc; padding: 0 5px 0 10px;">Clear</a>
 						<a href="{{url('brand/index/_ALL')}}" style="border-left: 1px solid #ccc; padding: 0 5px 0 10px;">View All</a>
 						</div>
 					<div id="vb_page_head">
@@ -86,11 +90,11 @@
 				  <div class="row">
 				  <tr data-bid="{{ $brand->brand_id }}" data-val="{{$brand->brand_count}}">
 					<td class="col-sm-1" align="center">
-						<input type="checkbox" name="check[]" value="{{ $brand->brand_id }}" />				  
-					  </td>
-					  <td class="col-sm-5">{{$brand->brand_name}}</td>     
-					  <td class="col-sm-4">{{ $brand->brand_count}}</td>     
-					  <td class="col-sm-2"><a class="edit-brand edit-brand-link" href="{{url('brand/edit/')}}/{{ $brand->brand_id }}" data-bid="{{ $brand->brand_id }}" data-bn="{{ $brand->brand_name }}" data-val="{{$brand->brand_count}}">Edit</a></td>     
+						<input type="checkbox" name="check[]" id="checks" value="{{ $brand->brand_id }}" data-bn="{{$brand->brand_name}}"/>				  
+					</td>
+					<td class="col-sm-5">{{$brand->brand_name}}</td>     
+					<td class="col-sm-4">{{ $brand->brand_count}}</td>     
+					<td class="col-sm-2"><a class="edit-brand edit-brand-link" href="{{url('brand/edit/')}}/{{ $brand->brand_id }}" data-bid="{{ $brand->brand_id }}" data-bn="{{ $brand->brand_name }}" data-val="{{$brand->brand_count}}">Edit</a></td>     
 				  </tr>
 				  </div>
 				  @endforeach	
@@ -115,7 +119,6 @@
 			 @endif	
 			</tbody>	  
 		</table>
-		</form>
 	</div>
 	<div name="foot" id="vb_foot" >
 		<div class="col-sm-5 text-left">
@@ -169,15 +172,37 @@
 	</tr>
 </script>
 
+<script id="delete-brand-template" type="text/x-handlebars-template">
+	<form action="{{ url('brand/delete')}}" method="post">
+	<div class="modal-header" style="background-color:#D43F3A">
+		<h4><span class="label label-warning">Warning</span><span style="font-color:#FFF">You are about to delete the following data</span></h4> 
+	</div>
+	<div class="modal-body">
+		<input type="hidden" name="_method" value="PUT">
+		{!! csrf_field() !!}
+		<ul class="list-group" id="dl_modal">
+		</ul>		
+	</div>
+	<div class="modal-footer">
+		<button type="submit" class="btn btn-default" name="delete_brands" value="YES">Yes</button>
+		<button type="button" class="btn btn-default close-modal" data-dismiss="modal" value="NO">No</button>
+	</div>
+</script>
+
+
 
 <script>
 	var tmpAddBrandForm = Handlebars.compile($("#add-brand-form-template").html());
 	var tmpBrandItem = Handlebars.compile($("#brand-template").html());
-	var brandTable = $("table#brand_table tbody");			
 	var tmpEditBrandForm = Handlebars.compile($("#edit-brand-template").html());	
+	
+	var brandTable = $("table#brand_table tbody");				
+	var brand_modal= $("div#vb_div");
+	
 	var brandName	='';
 	var brandId		=''; 	
 	var brandCount	='';
+	
 $(document).ready(function(){
 	
 	//$( ".pagination" ).addClass("pagination-sm");
@@ -232,6 +257,29 @@ $(document).ready(function(){
 		} 
 				
 	});
+	
+	$(document).on("click", ".delete-btn", function(event){
+		event.preventDefault();				
+		var tmpDeleteBrandForm = Handlebars.compile($("#delete-brand-template").html());
+		
+		brand_modal.empty();		
+		brand_modal.append(tmpDeleteBrandForm);	
+			
+		if($("input:checked").length){
+			brandTable.find("input[type|='checkbox']").each(function(){								
+				if($(this).is(":checked")){
+					//data.push($(this).attr('value'));
+					//name.push($(this).attr('data-bn'));
+					brand_modal.find("ul#dl_modal").append('<li class="list-group-item">'+$(this).attr('data-bn')+'<input type="hidden" name="delb[]" value="'+$(this).attr('value')+'" /></li>');
+				}
+			});		
+		}else{
+			brand_modal.find("ul#dl_modal").append('<li class="list-group-item">No Records Found</li>');
+		}
+			
+		brand_modal.find("#vb_div").append('</form>');
+	});
+	
 	
 });	
 

@@ -19,7 +19,7 @@ Route::get('/', function () {
 });
 
 // Private routes
-Route::group(['middleware' => ['auth']], function(){
+Route::group(['middleware' => ['auth', 'role']], function(){
 	Route::controller('product', 'ProductController');
 	Route::controller('category', 'CategoryController');
 	Route::controller('brand', 'BrandController');

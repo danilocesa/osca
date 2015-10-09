@@ -34,10 +34,22 @@
    <div class="panel panel-default panel-body">
 	{!! csrf_field() !!}
 	<input type="hidden" name="_method" value="PUT">
-	<input type="text" name="name" placeholder="User Name" value="{{ $user_name }}" class="form-control" /><br />
-	<input type="email" name="email" placeholder="E-mail" value="{{ $user_email }}" class="form-control" /><br />
-	<input type="password" name="password" placeholder="Password" class="form-control" /><br />
-	<input type="password" placeholder="Confirm Password" id="password_confirmation" class="form-control" required/>
+	<div>
+		<span style="color:red;">* </span>User Name :
+		<input type="text" name="name" placeholder="User Name" value="{{ $user_name }}" class="form-control" /><br />
+	</div>
+	<div>
+		<span style="color:red;">* </span>E-mail :
+		<input type="email" name="email" placeholder="E-mail" value="{{ $user_email }}" class="form-control" /><br />
+	</div>
+	<div>
+		<span style="color:red;">* </span>Password :
+		<input type="password" name="password" placeholder="Password" class="form-control" /><br />
+	</div>
+	<div>
+		<span style="color:red;">* </span>Confirm password :
+		<input type="password" placeholder="Confirm Password" id="password_confirmation" class="form-control" required/><br />
+	</div>
 	<div class="form-group between">
       <label>
 	   Role:

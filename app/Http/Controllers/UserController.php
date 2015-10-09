@@ -43,15 +43,15 @@ class UserController extends Controller
 		$messages = [
 			'name.required' => 'User Name field is required.',
 			'email.required' => 'User E-mail field is required.',
-			'password.required' => 'Password field is required.' //,
-			//'role_id.required' => 'User Role is required.'
+			'password.required' => 'Password field is required.',
+			'role_desc.required' => 'Role is required.'
 		];
 		
 		$validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|min:6',
-			'role_id' => 'required'
+			'role_desc' => 'required'
         ], $messages );
 		
 		if($validator->fails()){
@@ -82,15 +82,68 @@ class UserController extends Controller
 		]);
 	}
 	
-	public function putEdit()
+	public function putEdit(Request $request, $id)
 	{
+		$messages = [
+			'name.required' => 'User Name is required.',
+			'email.required' => 'User E-mail is required.',
+			'password.required' => 'Password is required.',
+			'role_desc.required' => 'Role is required.'
+		];
+		
+		$validator = Validator::make($request->all(), [
+            'name' => 'required|max:255',
+            'email' => 'required|email|max:255',
+            'password' => 'required|min:6',
+			'role_desc' => 'required'
+        ], $messages );
+		
+		if($validator->fails()){
+			return redirect('user/create')
+				->withErrors($validator)
+				->withInput();
+		}else {
+			$user = \App\User::find($id);
+			$user->name = $request->get('name');
+			$user->email = $request->get('email');
+			$user->password = $request->get('password');
+			$user->role_id = $request->get('role_desc');
+			$user->update();
+		
+			return redirect('user/index');
+		
+		}
 	}
 	
-	public function postDelete()
+	public function postDelete(Request $request)
 	{
+		$checks = array_get($request->all(), 'check');
+		
+		if(sizeof($checks)==0)
+		{
+			return redirect('user');
+		}else{
+			$data = \App\User::wherein('id', $checks)->get();
+			
+			return view('user.delete',[
+				'detail' => $data
+			]);
+		}
 	}
 	
-	public function deleteDelete()
+	public function deleteDelete(Request $request)
 	{
+		$data = array_get($request->all(), 'delete_users');
+		$delusers = array_get($request->all(), 'deluser');
+		
+		if($data == 'YES')
+		{
+			foreach($delusers as $dat)
+			{
+				$del_object = \App\User::find($dat);
+				$del_object->delete();
+			}
+		}
+		return redirect('user');
 	}
 }
