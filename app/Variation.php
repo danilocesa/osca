@@ -26,4 +26,14 @@ class Variation extends Model
 	{
 		return $this->hasOne('\App\Size', 'size_id', 'size_id');
 	}
+	
+	public function variationView()
+	{
+		return $this->hasOne('\App\VariationView', 'product_id', 'product_id');
+	}
+	
+	public function images()
+	{
+		return $this->hasMany('\App\Image', $primaryKey, $primaryKey);
+	}
 }

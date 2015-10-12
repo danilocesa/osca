@@ -63,3 +63,8 @@ tr:nth-child(odd){
 tr:nth-child(even){
 	background-color: #ffffff;
 }
+
+/************li**************/
+#dl_modal:nth-child(odd){
+	background-color: #F0F0F0;
+}

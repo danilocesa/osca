@@ -19,7 +19,8 @@ class BrandController extends Controller
 								->orderBy('upper(BRAND_NAME)')->paginate(10);						
 		}else{
 			//$a=substr($a,0,1); //URL control
-			$brand=\App\Brand::where('upper(BRAND_NAME)','like',$a.'%')
+			$brand=\App\Brand::select('brand_id','brand_name','(select count(1) from es_item_master eim join es_item_variation eiv on eim.model_code=eiv.model_code where brand_id_es=brand_id) brand_count')
+				->where('upper(BRAND_NAME)','like',$a.'%')
 				->where('status','=','6')
 				->orderBy('upper(BRAND_NAME)')->paginate(10);
 		}
@@ -31,11 +32,12 @@ class BrandController extends Controller
 	public function getSearch(){
 		
 		if($_GET['brand_search']==''){
-			$brand=\App\Brand::select('brand_id','brand_name','(select count(1) from es_item_master eim join es_item_variation eiv on eim.model_code=eiv.model_code where brand_id_es=brand_id) brand_count')
+			$brand=\App\Brand::select('brand_id','brand_name','(select count(brand_id_es) from es_item_master eim join es_item_variation eiv on eim.model_code=eiv.model_code where brand_id_es=brand_id) brand_count')
 								->orderBy('upper(BRAND_NAME)')
 								->paginate(10);						
 		}else{
-			$brand=\App\Brand::where('upper(BRAND_NAME)','like','%'.strtoupper($_GET['brand_search']).'%')
+			$brand=\App\Brand::select('brand_id','brand_name','(select count(brand_id_es) from es_item_master eim join es_item_variation eiv on eim.model_code=eiv.model_code where brand_id_es=brand_id) brand_count')
+				->where('upper(BRAND_NAME)','like','%'.strtoupper($_GET['brand_search']).'%')
 				->where('status','=','6')
 				->orderBy('UPPER(BRAND_NAME)')->paginate(10);
 		}
@@ -50,7 +52,7 @@ class BrandController extends Controller
 	
 	public function postAddBrand(Request $request){		
 				$validator = Validator::make($request->all(), [
-				'brand_name' => 'required|unique:LKP_BRAND,brand_name|max:255'
+				'brand_name' => 'required|unique:LKP_BRAND,brand_name|max:25'
 			]);			
 			
 			if($validator->fails()){				
@@ -75,7 +77,7 @@ class BrandController extends Controller
 	public function putEdit(Request $request, $id){				
 		
 		$validator = Validator::make($request->all(), [
-			'brand_name' => 'required|unique:LKP_BRAND,brand_name|max:255'
+			'brand_name' => 'required|unique:LKP_BRAND,brand_name|max:25'
 		]);			
 		
 		if($validator->fails()){

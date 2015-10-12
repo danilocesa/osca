@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Storage;
 
 class ProductController extends Controller
 {
@@ -158,6 +159,17 @@ class ProductController extends Controller
 	{
 		// validation
 		
+		//$this->updateMother($request);		
+		$this->updateVariations($request);		
+	
+		/*return response()->json([
+			'redirect' => $request->get('submit_button_clicked') == 'save_exit',
+			'message' => 'Your changes are saved.']);*/
+		return response()->json($request->all());
+	}
+	
+	private function updateMother(Request $request)
+	{
 		if ($request->get('product_changed')){
 			$product = \App\Product::findOrFail($model_code);
 			
@@ -202,11 +214,16 @@ class ProductController extends Controller
 			
 			$product->save();
 		}
+	}
+	
+	private function updateVariations(Request $request)
+	{
+		$folderName = $this->uploadImages($request);
 		
-		// Update variations
 		foreach($request->get('product_id') as $key => $value){
 			if ($request->get('variation_changed')[$key] || $request->get('product_changed')){
-				$variation = \App\Variation::find($key);
+				
+				$variation = \App\Variation::with('variationView')->find($key);
 				
 				if (is_array($request->get('enable'))){
 					if (array_key_exists($key, $request->get('enable')))
@@ -239,13 +256,53 @@ class ProductController extends Controller
 				$variation->last_update_by_id = \Auth::user()->id;
 				
 				$variation->save();
+				
+				// Update variation images
+				
+				// Get color display ID
+				$colorDisplayId = $variation->variationView->color_display_id;
+				
+				// Get image filenames under color display id
+				$images = $request->get('image_filenames')[$colorDisplayId];
+				$imageArray = explode('|', $images);
+				$seqNo = 2; // sequencing
+				
+				// Delete current records
+				\App\Image::where('product_id', '=', $variation->product_id)->delete();
+				
+				foreach($imageArray as $fileName){
+					if (!empty($fileName)){
+						// '1' is reserved for primary image of variation					
+						$curreSeqNo = array_key_exists($colorDisplayId, $request->get('primary_image_id')) && $request->get('primary_image_id')[$colorDisplayId] == $fileName ? 1 : $seqNo++;
+					
+						\App\Image::create([
+							'product_id' => $variation->product_id,
+							'image_full_path' => storage_path('app') . '/' . $folderName . '/' . $fileName,
+							'seq_no' => $curreSeqNo,
+							'filename' => $fileName
+						]);
+					}
+				}
 			}
 		}
+	}
 	
-		return response()->json([
-			'redirect' => $request->get('submit_button_clicked') == 'save_exit',
-			'message' => 'Your changes are saved.']);
-		//return response()->json($request->all());
+	// I'm too hot to handle
+	private function uploadImages(Request $request)
+	{				
+		$files = $request->file('images');
+	
+		if (count($files) > 0){
+			// Create timestamp folder and upload all files to it
+			$folderName = date("Y-m-d H:i:s", strtotime("now"));
+			Storage::makeDirectory($folderName);
+			
+			foreach($files as $file){
+				Storage::put($folderName . '//' . $file->getFileName() . '.' . $file->getClientOriginalExtension(), file_get_contents($file));
+			}	
+			
+			return $folderName;
+		}		
 	}
 	
 	// TEMP

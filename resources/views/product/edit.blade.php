@@ -8,7 +8,7 @@
 @endsection
 
 @section('content')
-<form method="POST" id="edit-product-form" class="form-horizontal" action="{{ url('product/edit/' . $item['model_code']) }}">
+<form method="POST" id="edit-product-form" class="form-horizontal" enctype="multipart/form-data" action="{{ url('product/edit/' . $item['model_code']) }}">
 	{!! csrf_field() !!}
 	<input type="hidden" name="_method" value="PUT">
 	<input type="hidden" id="product_changed" name="product_changed" value="0">
@@ -97,17 +97,27 @@
 		</div>
 	</div>
 </form>
+
+<script id="image-template" type="text/x-handlebars-template">
+	<div id="@{{ filename }}">
+		<input type="radio" name="primary_image_id[@{{ variation_id }}]" value="@{{ filename }}">	
+		<a href="#" class="remove-image-link" data-code-display-id="@{{ variation_id }}">X</a>
+		<img src="@{{ image_url }}"/>
+	</div>
+</script>
 @endsection
 	
 @section('scripts')
 {!! HTML::script('js/category-picker.js') !!}
 <script>
-
-	/*var selDiv = "";
-	var storedFiles = [];*/
+	var tmpImage = Handlebars.compile($("#image-template").html());
+	
 	var $productChanged = $("#product_changed");
 	var $submitButtons = $("#submit-buttons");
 	var $submitButtonClicked = $("#submit_button_clicked");
+	var $imageUpload = $("#imageUpload");
+	
+	var images = {};
 	
 	$(document).ready(function() {
 		// Initialize category picker
@@ -173,7 +183,37 @@
 		
 		// Handling click of upload button
 		$(document).on("click", ".btn-upload", function(event){
+			$imageUpload.click();
+		});
+		
+		// Changing of selected images for upload
+		$imageUpload.change(function(event){
+			var selectedVariationId = $("table#variation-primary-table tr.selected").attr("data-code-display-id");
 			
+			if (images[selectedVariationId] == null){
+				images[selectedVariationId] = [];
+			}
+			
+			var files = Array.prototype.slice.call(event.target.files);
+			
+			files.forEach(function(f) {
+				// Make sure only image files are selected
+				if(!f.type.match("image.*")) {
+					return false;
+				}
+				
+				// Check if image exists in array
+				if (checkImagesExists(selectedVariationId, f.name))
+					return false;
+				
+				// Add to array
+				images[selectedVariationId].push(f);
+
+				// Show image list
+				renderImages(selectedVariationId);
+			});	
+			
+			console.log(images);
 		});
 		
 		// Handling click of one any submit button
@@ -186,7 +226,7 @@
 				$("form#edit-product-form").submit();
 		});
 		
-		// Handling click of upload button
+		// Handling click of apply to all variations button
 		$(document).on("click", "a#btn-apply-package", function(event){
 			event.preventDefault();
 		
@@ -197,7 +237,8 @@
 		});
 		
 		// Submit product details form
-		$(document).on("submit", "form#edit-product-form", function(event){
+		/*$(document).on("submit", "form#edit-product-form", function(event){
+		
 			event.preventDefault();
 			
 			var $form = $(this);
@@ -223,74 +264,49 @@
 					}, 100);
 				}
 			});
-		});
-		
-		/*$("#files").on("change", handleFileSelect);
-		
-		selDiv = $("#selectedFiles"); 
-		$("#myForm").on("submit", handleForm);
-		
-		$("body").on("click", ".selFile", removeFile);*/
+		});*/
 	});
-		
-	/*function handleFileSelect(e) {
-		var files = e.target.files;
-		var filesArr = Array.prototype.slice.call(files);
-		filesArr.forEach(function(f) {			
-
-			if(!f.type.match("image.*")) {
-				return;
-			}
-			storedFiles.push(f);
-			
-			var reader = new FileReader();
-			reader.onload = function (e) {
-				var html = "<div class='uploadFile'><input type='radio' name='imgRadioButton'><p class='btn-xs btn-danger ckeck-align selFile' role='button'><span class='p-small'>X</span></p><br /><img src=\"" 
-							+ e.target.result + "\" data-file='"+f.name+"' class='selFilex' title='Click to remove'>" + "<br />" + f.name 
-							+ "</div>";
-							
-				selDiv.append(html);
-				
-			}
-			reader.readAsDataURL(f); 
+	
+	// Checks if image file name already exists in files array
+	function checkImagesExists(variationId, fileName)
+	{		
+		images[variationId].forEach(function(f){
+			if (f.name == fileName)
+				return true;
 		});
 		
+		return false;
 	}
+	
+	function renderImages(variationId)
+	{
+		var imageList = $(".image-files[data-code-display-id=\"" + variationId + "\"]");
+		var imageFilenames = ""; // Concatenate image filenames, because hidden form field cannot have multiple values, thanks HTML5
+		var imageFilenamesHidden = $(".image_filenames[data-code-display-id=\"" + variationId + "\"]");
 		
-	function handleForm(e) {
-		e.preventDefault();
-		var data = new FormData();
+		// Remove all contents first
+		imageList.html("");
 		
-		for(var i=0, len=storedFiles.length; i<len; i++) {
-			data.append('files', storedFiles[i]);	
-		}
-		
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', 'handler.cfm', true);
-		
-		xhr.onload = function(e) {
-			if(this.status == 200) {
-				console.log(e.currentTarget.responseText);	
-				alert(e.currentTarget.responseText + ' items uploaded.');
+		images[variationId].forEach(function(f){
+			var reader = new FileReader();
+			
+			reader.onload = function (e) {
+				// To prevent duplication infestation
+				if (imageList.find("div[id=\"" + f.name + "\"]").length == 0){
+					imageList.append(tmpImage({
+						image_url: e.target.result,
+						variation_id: variationId,
+						filename: f.name
+					}));	
+				}			
 			}
-		}
+			
+			imageFilenames += f.name + "|";
 		
-		xhr.send(data);
-	}
+			reader.readAsDataURL(f);
+		});
 		
-	function removeFile(e) {
-		var file = $(this).data("file");
-		for(var i=0;i<storedFiles.length;i++) {
-			if(storedFiles[i].name === file) {
-				storedFiles.splice(i,1);
-				break;
-			}
-		}
-		$(this).parent().remove();
+		imageFilenamesHidden.val(imageFilenames);
 	}
-
-   function chooseFile() {
-      $("#files").click();
-   }*/
 </script>
 @endsection

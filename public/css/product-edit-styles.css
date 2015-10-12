@@ -240,6 +240,11 @@ textarea.textarea-customized-long {
     overflow-x: hidden;
 }
 
+.horizontal-scroll-only{
+	overflow-y: hidden;
+    overflow-x: auto;
+}
+
 .alignment-custom-right {
 	float: right;
 }
@@ -360,4 +365,16 @@ table#variation-primary-table tr:hover{
 }
 tr.selected{
 	background:#aef !important;
+}
+.image-files{
+	height:140px;
+	overflow:auto;
+}
+.image-files div{
+	display:inline-block;
+}
+.image-files img{
+	white-space:nowrap;
+	width:140px;
+	height:140px;
 }

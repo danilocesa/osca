@@ -55,9 +55,9 @@
 	   Role:
 	  </label>
 	    <select class="form-control" name="role_desc" value="$user_role" style="width:150px; padding: 5px;">
-          <option value=""></option>
+          <!--option value=""></option-->
 		@foreach($roles as $role)
-		  <option value="{{ $role->role_id }}">{{ $role->role_name }}</option>
+		  <option {{ $role->role_id == $users->role_id ? 'selected' : null }} value="{{ $role->role_id }}">{{ $role->role_name }}</option>
 		@endforeach
         </select>
 	</div>

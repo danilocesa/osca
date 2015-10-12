@@ -136,7 +136,7 @@
 		<td class="col-sm-5" align="Left">
 			<form class="form-inline" id="add-brand-form" action="{{ url('brand/add-brand') }}" method="post">				
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="brand_name" name="brand_name" placeholder="Alpha numeric" value="@{{ brand_name }}"/>
+				<input class="form-control" type="text" id="brand_name" name="brand_name" placeholder="Alpha numeric" value="@{{ brand_name }}" maxlength=25 />
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-brand cancel-add-btn btn btn-default btn-xs" value="Cancel">
 			</form>
@@ -162,7 +162,7 @@
 			<form class="form-inline" id="edit-brand-form" action="{{ url('brand/edit') }}/@{{ brand_id }}" method="post">
 				<input type="hidden" name="_method" value="PUT">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="brand_name" name="brand_name" value="@{{ brand_name }}"/>
+				<input class="form-control" type="text" id="brand_name" name="brand_name" value="@{{ brand_name }}" maxlength=25/>
 				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
 				<input type="button" class="cancel-brand cancel-edit-btn btn btn-default btn-xs" data-bn="@{{ brand_name }}" data-bid="@{{ brand_id }}" data-val="@{{brand_count}}" value="Cancel">
 			</form>
@@ -175,7 +175,7 @@
 <script id="delete-brand-template" type="text/x-handlebars-template">
 	<form action="{{ url('brand/delete')}}" method="post">
 	<div class="modal-header" style="background-color:#D43F3A">
-		<h4><span class="label label-warning">Warning</span><span style="font-color:#FFF">You are about to delete the following data</span></h4> 
+		<h4><span class="label label-warning">Warning!</span> <span style="color:#FFF;">You are about to delete the following data</span></h4> 
 	</div>
 	<div class="modal-body">
 		<input type="hidden" name="_method" value="PUT">
@@ -184,8 +184,6 @@
 		</ul>		
 	</div>
 	<div class="modal-footer">
-		<button type="submit" class="btn btn-default" name="delete_brands" value="YES">Yes</button>
-		<button type="button" class="btn btn-default close-modal" data-dismiss="modal" value="NO">No</button>
 	</div>
 </script>
 
@@ -273,8 +271,11 @@ $(document).ready(function(){
 					brand_modal.find("ul#dl_modal").append('<li class="list-group-item">'+$(this).attr('data-bn')+'<input type="hidden" name="delb[]" value="'+$(this).attr('value')+'" /></li>');
 				}
 			});		
+				brand_modal.find("div.modal-footer").append('<button type="submit" class="btn btn-default" name="delete_brands" value="YES">Yes</button>');
+				brand_modal.find("div.modal-footer").append('<button type="button" class="btn btn-default close-modal" data-dismiss="modal" value="NO">No</button>');
 		}else{
-			brand_modal.find("ul#dl_modal").append('<li class="list-group-item">No Records Found</li>');
+			brand_modal.find("ul#dl_modal").append('<li class="list-group-item">No records selected</li>');						
+			brand_modal.find("div.modal-footer").append('<button type="button" class="btn btn-default close-modal btn-primary" data-dismiss="modal">OK</button>');
 		}
 			
 		brand_modal.find("#vb_div").append('</form>');

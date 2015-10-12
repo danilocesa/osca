@@ -13,13 +13,16 @@ class UserController extends Controller
 	{
 		if($a == '_ALL')
 		{ //\App\User
-			$user = \App\User::with('role')->orderBy ('upper(NAME)')->paginate(10);
+			$user = \App\User::with('role')->where('status', '=', '6')
+							->orderBy ('upper(NAME)')->paginate(10);
 		}else if ($a == '_NONE'){
 			$user = \App\User::with('role')->where('upper(NAME)', 'like', $a.'%')
+				->where('status', '=', '6')
 				->orderBy('upper(NAME)')->paginate(0);
 		}else{
 			$a = substr(strtoupper($a), 0, 1);
 			$user = \App\User::with('role')->where('upper(NAME)', 'like', $a.'%')
+				->where('status', '=', '6')
 				->orderBy('upper(NAME)')->paginate(10);
 		}
 		
@@ -110,7 +113,7 @@ class UserController extends Controller
 			$user->role_id = $request->get('role_desc');
 			$user->update();
 		
-			return redirect('user/index');
+			return redirect('user');
 		
 		}
 	}
@@ -125,9 +128,10 @@ class UserController extends Controller
 		}else{
 			$data = \App\User::wherein('id', $checks)->get();
 			
-			return view('user.delete',[
-				'detail' => $data
-			]);
+			//return view('user.delete',[
+				//'detail' => $data
+			//]);
+			return redirect('user');
 		}
 	}
 	
@@ -141,7 +145,10 @@ class UserController extends Controller
 			foreach($delusers as $dat)
 			{
 				$del_object = \App\User::find($dat);
-				$del_object->delete();
+				$del_object->status = 7;
+				$del_object->last_update_date = \DB::raw('SYSDATE');
+				$del_object->last_update_by = \Auth::user()->id;
+				$del_object->update();
 			}
 		}
 		return redirect('user');
