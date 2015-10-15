@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Storage;
+use Validator;
 
 class ProductController extends Controller
 {
@@ -90,7 +91,10 @@ class ProductController extends Controller
 		$color_variations = [];
 		
 		$variations = [];
-		
+
+		$product_images = [];
+
+
 		foreach($product->variationsView as $variation){
 			$variations[] = [
 				'product_id' => 		$variation->product_id,
@@ -111,22 +115,25 @@ class ProductController extends Controller
 				'approved' => 			$variation->approved,
 				'inventory' => 			$variation->inventory,
 			];
-			
+
 			if (!array_key_exists($variation->color_display_id, $color_variations)){
 				$color_variations[$variation->color_display_id] = [
 					'color_display_name' => $variation->color_display_name,
 					'color_hex_code' => $variation->color_hex_code
 				];
 			}
+			
 		}
+
+
 		
 		$item = [
 			'model_code' => 				$product->model_code,
 			'product_name_mms' => 			$product->product_name_mms,						
 			'brand_name_mms' => 			isset($product->brandMms->brand_name) ? $product->brandMms->brand_name : null,
 			'product_name_es' => 			$product->product_name_es,
-			'brand_id_es' => 				isset($product->brandEs->brand_id) ? $product->brandMms->brand_id : null,
-			'brand_name_es' => 				isset($product->brandEs->brand_name) ? $product->brandMms->brand_name : null,
+			'brand_id_es' => 				isset($product->brandEs) ? $product->brandEs->brand_id : null,
+			'brand_name_es' => 				isset($product->brandEs) ? $product->brandEs->brand_name : null,
 			'variations' => 				$variations,
 			'product_width' => 				$product->product_width,
 			'product_height' => 			$product->product_height,
@@ -152,23 +159,101 @@ class ProductController extends Controller
 			'shipping_group' => 			$product->shipping_group,
 		];
 		
-		return view('product.edit', compact('item', 'categories', 'ages', 'product_styles', 'genders', 'worlds', 'color_variations'));
+		// dump($product->brandMms);
+
+		return view('product.edit', compact('item', 'categories', 'ages', 'product_styles', 'genders', 'worlds', 'color_variations','product_images'));
 	}
 	
 	public function putEdit(Request $request, $model_code)
 	{
 		// validation
+		$validator=Validator::make($request->all(),[
+			'product_name_es'			=> 'required|max:150'
+		,	'brand_id_es'				=> 'required'
+		,	'subcategories'				=> 'required'
+		,	'package_weight'			=> 'numeric'
+		,	'package_width'				=> 'numeric'
+		,	'package_height'			=> 'numeric'
+		,	'package_depth'				=> 'numeric'
+		,	'short_description'			=> 'max:555'
+		,	'description'				=> 'max:555'
+		,	'primary_color_display_id'  => 'required'
+		,	'image_filenames'           => 'required'
+		,	'submit_button_clicked'		=> 'required'
+		,	'product_weight'			=> 'numeric'
+		,	'product_width'				=> 'numeric'
+		,	'product_height'			=> 'numeric'
+		,	'product_depth'				=> 'numeric'
+		,	'meta_title'				=> 'max:555'
+		,	'meta_keyword'              => 'max:555'
+		]);
+
+		//Custom settings for validations
+		$validator->after(function($validator){
 		
-		//$this->updateMother($request);		
-		$this->updateVariations($request);		
-	
-		/*return response()->json([
-			'redirect' => $request->get('submit_button_clicked') == 'save_exit',
-			'message' => 'Your changes are saved.']);*/
-		return response()->json($request->all());
+			$weight=array_get($validator->getData(),'weight');
+			$height=array_get($validator->getData(),'height');
+			$width=array_get($validator->getData(),'width');
+			$length=array_get($validator->getData(),'length');
+			
+			
+			foreach($weight as $key=>$val){
+				if(strlen($val)==0){
+					$validator->errors()->add('weight','There is an empty value for weight.');
+				}elseif(!is_numeric($val)){
+					$validator->errors()->add('weight','Invalid input for weight.');
+				}
+			}
+			
+			foreach($height as $key=>$val){
+				if(strlen($val)==0){
+					$validator->errors()->add('height','There is an empty value for weight.');
+				}elseif(!is_numeric($val)){
+					$validator->errors()->add('height','Invalid input for weight.');
+				}
+			}
+			
+			foreach($width as $key=>$val){
+				if(strlen($val)==0){
+					$validator->errors()->add('width','There is an empty value for weight.');
+				}elseif(!is_numeric($val)){
+					$validator->errors()->add('width','Invalid input for weight.');
+				}
+			}
+			
+			foreach($length as $key=>$val){
+				if(strlen($val)==0){
+					$validator->errors()->add('length','There is an empty value for weight.');
+				}elseif(!is_numeric($val)){
+					$validator->errors()->add('length','Invalid input for weight.');
+				}
+			}
+			
+		});		
+
+		$this->updateMother($request,$model_code);
+		
+		if($validator->fails()){	
+			return response()->json([ 
+				'message' => $validator->errors(),
+				'error'=> TRUE
+				]);				
+		}else{
+			if( $this->updateVariations($request) !== TRUE){
+				return $this->updateVariations($request);
+			}else{
+				//return response()->json($request->all());
+
+				return response()->json([
+				'redirect' => $request->get('submit_button_clicked') == 'save_exit',
+				'message' => 'Your changes are saved.']);
+			}
+		}
+		
+		
 	}
 	
-	private function updateMother(Request $request)
+	private function updateMother(Request $request,$model_code)
 	{
 		if ($request->get('product_changed')){
 			$product = \App\Product::findOrFail($model_code);
@@ -218,12 +303,25 @@ class ProductController extends Controller
 	
 	private function updateVariations(Request $request)
 	{
-		$folderName = $this->uploadImages($request);
-		
+		// if($request->get('primary_image_id') === NULL){
+		// 	return response()->json([
+		// 	'error' => TRUE,
+		// 	// 'redirect' => $request->get('submit_button_clicked') == 'save_exit',
+		// 	'message' => 'No primary image selected!']);
+		// }
+
+		//If request has file 
+		if($request->hasFile('images')){
+			$folderName = $this->uploadImages($request);	
+		}
+
+		// dump($request->all());
 		foreach($request->get('product_id') as $key => $value){
 			if ($request->get('variation_changed')[$key] || $request->get('product_changed')){
 				
 				$variation = \App\Variation::with('variationView')->find($key);
+				
+				// dump($variation);
 				
 				if (is_array($request->get('enable'))){
 					if (array_key_exists($key, $request->get('enable')))
@@ -254,51 +352,54 @@ class ProductController extends Controller
 				
 				$variation->last_update_date = \DB::raw('SYSDATE');
 				$variation->last_update_by_id = \Auth::user()->id;
-				
+
 				$variation->save();
 				
 				// Update variation images
 				
 				// Get color display ID
 				$colorDisplayId = $variation->variationView->color_display_id;
-				
-				// Get image filenames under color display id
-				$images = $request->get('image_filenames')[$colorDisplayId];
-				$imageArray = explode('|', $images);
-				$seqNo = 2; // sequencing
-				
-				// Delete current records
-				\App\Image::where('product_id', '=', $variation->product_id)->delete();
-				
-				foreach($imageArray as $fileName){
-					if (!empty($fileName)){
-						// '1' is reserved for primary image of variation					
-						$curreSeqNo = array_key_exists($colorDisplayId, $request->get('primary_image_id')) && $request->get('primary_image_id')[$colorDisplayId] == $fileName ? 1 : $seqNo++;
+
+				//If request has file
+				if($request->hasFile('images')){
+					// Get image filenames under color display id
+					$images = $request->get('image_filenames')[$colorDisplayId];
+					$imageArray = explode('|', $images);
+					$seqNo = 2; // sequencing
+
+					// Delete current records
+					// \App\Image::where('product_id', '=', $variation->product_id)->delete();
 					
-						\App\Image::create([
-							'product_id' => $variation->product_id,
-							'image_full_path' => storage_path('app') . '/' . $folderName . '/' . $fileName,
-							'seq_no' => $curreSeqNo,
-							'filename' => $fileName
-						]);
+					foreach($imageArray as $fileName){
+						if (!empty($fileName)){
+							// '1' is reserved for primary image of variation
+							$curreSeqNo = array_key_exists($colorDisplayId, $request->get('primary_image_id')) && $request->get('primary_image_id')[$colorDisplayId] == $fileName ? 1 : $seqNo++;$request->get('primary_image_id');
+							\App\Image::create([
+								'product_id' => $variation->product_id,
+								'image_full_path' => storage_path('app') . '/' . $folderName . '/' . $fileName,
+								'seq_no' => $curreSeqNo,
+								'filename' => $fileName
+							]);
+							
+						}
 					}
 				}
 			}
 		}
+		return TRUE;
 	}
 	
 	// I'm too hot to handle
 	private function uploadImages(Request $request)
 	{				
 		$files = $request->file('images');
-	
 		if (count($files) > 0){
 			// Create timestamp folder and upload all files to it
 			$folderName = date("Y-m-d H:i:s", strtotime("now"));
 			Storage::makeDirectory($folderName);
 			
 			foreach($files as $file){
-				Storage::put($folderName . '//' . $file->getFileName() . '.' . $file->getClientOriginalExtension(), file_get_contents($file));
+				Storage::put($folderName . '//' . $file->getClientOriginalName(), file_get_contents($file));
 			}	
 			
 			return $folderName;
@@ -326,4 +427,46 @@ class ProductController extends Controller
 		
 		return $data;
 	}
+
+
+	public function getVarimage($model_code){
+		$product_images = [];
+		$product = \App\Product::with('variationsView')->findOrFail($model_code);
+		foreach($product->variationsView as $variation){
+			//Get images by product id
+			$color_images = \App\Image::where('product_id',$variation->product_id)->get();
+			foreach ($color_images as $key => $value) {
+					$product_images[] = [
+					'product_id' =>					$value->product_id,
+					'image_full_path' =>			$value->image_full_path,
+					'filename' =>					$value->filename,
+					'seq_no' =>						$value->seq_no == 1 ? "checked": NULL,
+					'primary_image_id' =>			$variation->color_display_id
+				];	
+			}
+		}
+		return response()->json($product_images);
+
+	}
+
+
+	//log
+	public function getLog($model_code)
+	{
+		$productrecords = \App\productUpdateLog::with('user')
+						->where('model_code', $model_code)
+						->orderBy('update_date')
+						->get(); //find($model_code);
+		$variationrecords = \App\variationUpdateLog::where('model_code', $model_code)
+						->orderBy('update_date')
+						->get(); //find($model_code);
+			
+		return view('product.log', [
+			'productrecords' => $productrecords,
+			'variationrecords' => $variationrecords
+		]);
+			
+	}
+
+
 }

@@ -10,7 +10,6 @@
 | and give it the controller to call when that URI is requested.
 |
 */
-
 // Public routes
 Route::controller('auth', 'Auth\AuthController');
 

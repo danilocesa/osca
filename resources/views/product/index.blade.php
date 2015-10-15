@@ -39,7 +39,7 @@
 						<td></td>
 						<td class="text-center">
 							<a href="{{ url('product/edit/' . $item['model_code']) }}" title="Edit">Edit</a><br/>
-							<a href="#" title="Log">Log</a>
+							<a href="{{ url('product/log/' . $item['model_code']) }}" title="Log">Log</a>
 						</td>
 					</tr>
 					@foreach($item['variations'] as $variation)
@@ -73,7 +73,7 @@
 						<td>{{ $item['status'] }}</td>
 						<td class="text-center">
 							<a href="{{ url('product/edit/' . $item['model_code']) }}" title="Edit">Edit</a><br/>
-							<a href="#" title="Log">Log</a>
+							<a href="{{ url('product/log/' . $item['model_code']) }}" title="Log">Log</a>
 						</td>
 					</tr>
 				@endif
