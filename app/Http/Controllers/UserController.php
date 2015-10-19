@@ -64,22 +64,35 @@ class UserController extends Controller
 	{
 		$messages = [
 			'name.required' => 'User Name field is required.',
+			//'name.unique'	=> 'User Name may be existing or previously deleted.',
 			'email.required' => 'User E-mail field is required.',
 			'password.required' => 'Password field is required.',
+			//'password_confirmed.same' => 'Password mismatch. Please try again.',
 			'role_desc.required' => 'Role is required.'
 		];
 		
 		$validator = Validator::make($request->all(), [
-            'name' => 'required|max:255',
+            'name' => 'required|max:255',   //Username must be unique
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|min:6',
+            'password' => 'required|min:6|confirmed',
 			'role_desc' => 'required'
-        ], $messages );
+        ], $messages );		
+		
+		$username='';
+		
+		$validator->after(function($validator){
+			$data = $validator->getData();
+			$username = $data['name'];
+			
+			//Username must be checked if Active or not
+			
+		});
 		
 		if($validator->fails()){
-			return redirect('user/create')
-				->withErrors($validator)
-				->withInput();
+			// return redirect('user/create')
+				// ->withErrors($validator)
+				// ->withInput();				
+				return dump($username);
 		}
 		
 		\App\User::create([

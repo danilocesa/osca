@@ -3,6 +3,9 @@
 		<label id="subcategories" for="estorecategories" class="col-md-2 label-customized">
 			<span class="required-field">*</span> Categories
 		</label>
+		<div class="error-message">
+		{{ $errors->errmess->first('subcategories') }}
+		</div>
 		<a id="show-category-picker" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>		
 		<div id="category-modal" class="modal fade" role="dialog" aria-labelledby="gridSystemModalLabel">
 			<div class="modal-dialog modal-sm" role="document">

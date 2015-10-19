@@ -7,8 +7,11 @@ function submitAjaxForm(form, successFunction) {
 		error : function(data) {
 			console.debug(data);
 			var json = data.responseJSON;
+			// Remove previous errors
+			form.find("div.error-message").remove();
+			// Display errors
 			for (var item in json){
-				form.find("#" + item).formError(json[item][0]);
+				form.find("#" + item).after('<div class="error-message">' + json[item][0] + '</div>');
 			}
 		}
 	});

@@ -9,9 +9,7 @@
 
 @section('content')
 <!-- temp message -->
-<div id="tempMessage"></div>
-
-
+{{ dump($errors->toArray()) }}
 <form method="POST" id="edit-product-form" class="form-horizontal" enctype="multipart/form-data" action="{{ url('product/edit/' . $item['model_code']) }}">
 	{!! csrf_field() !!}
 	<input type="hidden" name="_method" value="PUT">
@@ -43,10 +41,10 @@
 			<div class="panel panel-default">
 				<div class="panel-heading panel-heading-customized es-color">E-STORE</div>
 				<div class="panel-body">
-					<h5 class="panel panel-customized">Edit Product</h5>		  
+					<h5 class="panel panel-customized">Edit Product</h5><div id="err_mother_mess"></div>						
 					@include('product.partials.edit_product_partial')						
 					<br/>						
-					<h5 class="panel panel-customized">Categorization</h5>
+					<h5 class="panel panel-customized">Categorization</h5><div id="err_categ_mess"></div>
 					@include('product.partials.categorization_partial')
 					<br />		  
 					<div class="row">
@@ -61,7 +59,7 @@
 						</div>
 					</div>
 					<br />
-					<h5 class="panel panel-customized">Variations</h5>
+					<h5 class="panel panel-customized">Variations</h5><div id="err_color_mess"></div>
 					<div class="row">
 						<div class="col-md-12">
 							@include('product.partials.upload_images_partial')	
@@ -78,6 +76,7 @@
 								<div id="square" class="mms-color"></div>
 								<p class="side-note">MMS</p>
 							</div>
+							<div class="col-md-10" id="error_mess"></div>
 						</div>	
 					</div>
 					<div class="row">
@@ -87,11 +86,11 @@
 					</div>	   
 					<div class="row">
 						<div class="col-md-6">
-							<h5 class="panel panel-customized">Other Details</h5>
+							<h5 class="panel panel-customized">Other Details</h5><div id="err_other_dets"></div>
 							@include('product.partials.other_details_partial')
 						</div>						
 						<div class="col-md-6">
-							<h5 class="panel panel-customized">Search Engine / Youtube Video</h5>
+							<h5 class="panel panel-customized">Search Engine / Youtube Video</h5>							
 							@include('product.partials.search_engine_partial')
 						</div>
 					</div>		  
@@ -104,7 +103,7 @@
 
 <script id="image-template" type="text/x-handlebars-template">
 	<div id="@{{ filename }}">
-		<input type="radio" name="primary_image_id[@{{ variation_id }}]" value="@{{ filename }}" checked="@{{ seq_no }}" >	
+		<input type="radio" name="primary_image_id[@{{ variation_id }}]" value="@{{ filename }}">	
 		<a href="#" class="remove-image-link" data-code-display-id="@{{ variation_id }}" data-product-id="@{{ product_id }}" >X</a>
 		<img src="@{{ image_url }}"/>
 	</div>
@@ -120,13 +119,11 @@
 	var $submitButtons = $("#submit-buttons");
 	var $submitButtonClicked = $("#submit_button_clicked");
 	var $imageUpload = $("#imageUpload");
-	
+	// List of images per variation (color)
 	var images = {};
 	
 	$(document).ready(function() {
 
-		// Initialize existing images
-		getImageExists();
 		// Initialize category picker
 		initCategoryPicker();
 		
@@ -174,17 +171,11 @@
 			$submitButtons.css("display", "inline-block");
 		});
 		
-		// Handling of primary images (radio button)
-		$(document).on("change", ".image-files", function(event){
-			$submitButtons.css("display", "inline-block");
-		});
-
 		// Changing of primary variation (radio button)
 		$(document).on("change", ".color-variation", function(event){
-			$submitButtons.css("display", "inline-block");
+			
 		});
 		
-
 		// Show images for selected variation
 		$("table#variation-primary-table").on("click", "tr", function(event){
 			$("table#variation-primary-table tr.selected").removeClass("selected");
@@ -231,8 +222,6 @@
 				// Show image list
 				renderImages(selectedVariationId);
 			});	
-			
-			console.log(images);
 		});
 		
 		// Handling click of one any submit button
@@ -256,43 +245,21 @@
 		});
 		
 		// Submit product details form
-		// $(document).on("submit", "form#edit-product-form", function(event){
+		/*$(document).on("submit", "form#edit-product-form", function(event){
+			event.preventDefault();
 			
-		// 	event.preventDefault();
-			
-		// 	var $form = $(this);
-		// 	submitAjaxForm($form, function(data){
-		// 		if (data.redirect == true){
-		// 			document.location.href = "{{ url('product') }}";
-		// 		} 
-		// 		else if(data.error == true){
-		// 			alert('Validation message under construction!');
-		// 			$.each(data.message, function(k,v) {
-		// 				  var myNewDiv = '<div class="alert alert-danger" role="alert" >'+v+'</div>';
-		// 			 	$('#tempMessage').append(myNewDiv);
-		// 			});
-					
-		// 		}
-		// 		else {
-		// 			// Reset state, hide submit buttons
-		// 			$(".variation_changed").val(0);
-		// 			$productChanged.val(0);					
-		// 			$submitButtons.hide();
-		// 			$("#top-alert").addClass("alert-success")
-		// 				.find("span#message")
-		// 				.html(data.message)
-		// 				.parent()
-		// 				.find("span#icon")
-		// 				.addClass("glyphicon-ok")
-		// 				.parent()
-		// 				.fadeIn(100);
-		// 			// Scroll to top
-		// 			$('body,html').animate({
-		// 				scrollTop: 0
-		// 			}, 100);
-		// 		}
-		// 	});
-		// });
+			var $form = $(this);
+			submitAjaxForm($form, function(data){
+				if (data.redirect == true){
+					document.location.href = "{{ url('product') }}";
+				} else {
+					// Reset state, hide submit buttons
+					$(".variation_changed").val(0);
+					$productChanged.val(0);					
+					$submitButtons.hide();				
+				}
+			});
+		});*/
 	});
 	
 	// Checks if image file name already exists in files array
@@ -335,45 +302,6 @@
 		});
 		
 		imageFilenamesHidden.val(imageFilenames);
-	}
-
-	function getImageExists(){
-		$("tr[data-code-display-id]").each(function(){
-		  if($(this).hasClass("selected")){
-		  		var CSRF_TOKEN = $('input[name="_token"]').val();
-		  		var dataPass = {_token:CSRF_TOKEN, primary_id: $(this).data('code-display-id') }
-		  		$.ajax({
-					url: '{{ url('product/varimage/'.$item['model_code']) }}',
-					type: 'GET',
-					data: dataPass,
-					success: function(data){
-						$.each(data, function(k,v) {
-							//console.log(k);
-							var imageList = $(".image-files[data-code-display-id=\"" + v.primary_image_id + "\"]");
-							var imageFilenames = ""; // Concatenate image filenames, because hidden form field cannot have multiple values, thanks HTML5
-							var imageFilenamesHidden = $(".image_filenames[data-code-display-id=\"" + v.primary_image_id + "\"]");
-							
-							if (imageList.find("div[id=\"" + v.filename + "\"]").length == 0){
-								imageList.append(tmpImage({
-									image_url: '../../../'+v.image_full_path.substring(23),
-									variation_id: v.primary_image_id,
-									filename: v.filename,
-									seq_no: v.seq_no,
-									product_id: v.product_id
-								}));	
-							}		
-						});
-						
-						
-					},
-					error : function(data) {
-						console.debug(data);
-					}
-				});
-		  }
-		 
-		});
-
 	}
 </script>
 @endsection

@@ -97,3 +97,12 @@
 .table th, .table td { 
      border-top: none !important;
  }
+
+/*
+ * Error messages
+ */ 
+div.error-message{
+	font-size:0.9em;
+	color:red;
+	text-align:left;
+}

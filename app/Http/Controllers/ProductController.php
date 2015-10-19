@@ -20,26 +20,66 @@ class ProductController extends Controller
      *
      * @return Response
      */
-    public function getIndex()
+    public function getIndex($a = '_ALL')
     {
-		$products = \App\Product::with('brandMms', 'brandEs', 'variationsView')->select(['model_code', 'product_name_mms', 'product_name_es', 'brand_id_mms', 'brand_id_es'])->paginate(10);		
+		$products = \App\Product::with('brandMms', 'brandEs', 'variationsView')
+				->select(['model_code', 'product_name_mms', 'product_name_es', 'brand_id_mms', 'brand_id_es', 'primary_color_display_id']);
+	
+		if($a == '_ALL') {
+			$products = $products->paginate(10);			
+			return $this->getVariations($products);			
+		} else {
+			$a = substr(strtoupper($a), 0, 1);
+			$products = $products->where('upper(product_name_mms)','like', $a.'%')
+				->paginate(10);				
+			return $this->getVariations($products);
+		}
 		
-		//return response()->json($products);
+    }
+	
+	//search field
+	public function getSearch()
+	{	
+		if($_GET['product_search']==''){
+			$products = \App\Product::with('brandMms', 'brandEs', 'variationsView')
+				->select(['model_code', 'product_name_mms', 'product_name_es', 'brand_id_mms', 'brand_id_es'])
+				->paginate(10);
+				
+				return $this->getVariations($products);
+		}else{
+			$products = \App\Product::with('brandMms', 'brandEs', 'variationsView')
+				->select(['model_code', 'product_name_mms', 'product_name_es', 'brand_id_mms', 'brand_id_es'])
+				->where('upper(product_name_mms)','like','%'.strtoupper($_GET['product_search']).'%')
+				->orderBy('UPPER(product_name_mms)')
+				->paginate(10);
+				
+				return $this->getVariations($products);
+		}
 		
+	}
+	
+	//products data
+	public function getVariations($products)
+	{		
 		$items = [];
 		
 		foreach($products as $product){
 			$brand_name = is_null($product->brandEs) ? (is_null($product->brandMms) ? 'Not Available' : $product->brandMms->brand_name) : $product->brandEs->brand_name;
 			
 			$product_name = $product->product_name_es ?: $product->product_name_mms;
-		
+
+			$image = $product->getPrimaryImage();
+			$image = is_null($image) ? 'No image' : $image->createImageTag();
 			// If product has only one variation, put all mother and child data in one row
 			if (count($product->variations) > 1) {
 				
 				$variations = [];
 			
 				foreach ($product->variationsView as $variation){
+					$variation_image = \App\Variation::find($variation->product_id)->getPrimaryImage();
+					$variation_image = is_null($variation_image) ? 'No image' : $variation_image->createImageTag();
 					$variations[] = [
+						'image' => $variation_image,
 						'sku_barcode' => $variation->sku_barcode,
 						'environment_code' => $variation->environment_code,
 						'variation_name' => $variation->variations,
@@ -51,7 +91,7 @@ class ProductController extends Controller
 				}
 			
 				$items[] = [
-					'image' => $product->image_id,
+					'image' => $image,
 					'model_code' => $product->model_code,
 					'product_name' => ucwords(strtolower($product_name)),
 					'brand_name' => ucwords(strtolower($brand_name)),
@@ -62,7 +102,7 @@ class ProductController extends Controller
 				$variation = $product->variationsView[0];
 			
 				$items[] = [
-					'image' => $product->image_id,
+					'image' => $image,
 					'model_code' => $product->model_code,
 					'product_name' => ucwords(strtolower($product_name)),
 					'brand_name' => ucwords(strtolower($brand_name)),
@@ -73,11 +113,10 @@ class ProductController extends Controller
 					'enable' => $variation->enable,
 					'status' => $variation->status_name
 				];	
-			}		
-		}		
-		
+			}	
+		}
         return view('product.index', compact('items', 'products'));
-    }
+	}
 	
 	public function getEdit($model_code)
 	{
@@ -89,22 +128,17 @@ class ProductController extends Controller
 		$product_styles = \App\ProductStyle::orderBy('product_style_name')->get();		
 		$genders = \App\Gender::orderBy('gender_name')->get();
 		$color_variations = [];
-		
 		$variations = [];
-
-		$product_images = [];
-
-
 		foreach($product->variationsView as $variation){
 			$variations[] = [
 				'product_id' => 		$variation->product_id,
 				'enable' => 			$variation->enable,
-				'color_name' => 		$variation->color_name,
-				'color_code' => 		$variation->color_code,
-				'color_display_id' => 	$variation->color_display_id,
-				'color_display_name' => $variation->color_display_name,
-				'size_name' => 			$variation->size_name,
-				'size_code' => 			$variation->size_code,
+				'color_name' => 		empty($variation->color_name) ? '(No color)' : $variation->color_name,
+				'color_code' => 		empty($variation->color_code) ? '(No color)' : $variation->color_code,
+				'color_display_id' => 	empty($variation->color_display_id) ? '(No color)' : $variation->color_display_id,
+				'color_display_name' => empty($variation->color_display_name) ? '(No color)' : $variation->color_display_name,
+				'size_name' => 			empty($variation->size_name) ? '(No size)' : $variation->size_name,
+				'size_code' => 			empty($variation->size_code) ? '(No size)' : $variation->size_code,
 				'sku_barcode' => 		$variation->sku_barcode,
 				'environment_code' => 	$variation->environment_code,
 				'price' => 				money_format('%.2n', $variation->price),
@@ -117,9 +151,24 @@ class ProductController extends Controller
 			];
 
 			if (!array_key_exists($variation->color_display_id, $color_variations)){
+				$variationImages = [];
+				
+				$images = \App\Image::where('model_code', '=', $model_code)
+					->where('color_display_id', '=', $variation->color_display_id)
+					->get();
+					
+				foreach($images as $image){
+					$variationImages[] = [
+						'filename' => $image->filename,
+						'seq_no' => $image->seq_no,
+						'image' => $image->createImageTag(),
+					];
+				}
+
+
 				$color_variations[$variation->color_display_id] = [
-					'color_display_name' => $variation->color_display_name,
-					'color_hex_code' => $variation->color_hex_code
+					'color_display_name' => empty($variation->color_display_name) ? '(No color)' : $variation->color_display_name,
+					'variation_images' => $variationImages
 				];
 			}
 			
@@ -161,13 +210,30 @@ class ProductController extends Controller
 		
 		// dump($product->brandMms);
 
-		return view('product.edit', compact('item', 'categories', 'ages', 'product_styles', 'genders', 'worlds', 'color_variations','product_images'));
+		return view('product.edit', compact('item', 'categories', 'ages', 'product_styles', 'genders', 'worlds', 'color_variations'));
 	}
 	
 	public function putEdit(Request $request, $model_code)
 	{
 		// validation
-		$validator=Validator::make($request->all(),[
+		$messages=[
+			'product_name_es.required' 			=> 'Product name is required'
+		,	'brand_id_es.required'				=> 'Brand name is required'
+		,	'primary_color_display_id.required'	=> 'Primary color is required'
+		,	'subcategories.required'			=> 'You must select at least 1 category'	
+		,	'package_weight.numeric'			=> 'Please enter a number'
+		,	'package_width.numeric'				=> 'Please enter a number'
+		,	'package_height.numeric'			=> 'Please enter a number'
+		,	'package_depth.numeric'				=> 'Please enter a number'
+		,	'product_weight.numeric'			=> 'Please enter a number'
+		,	'product_width.numeric'				=> 'Please enter a number'
+		,	'product_height.numeric'			=> 'Please enter a number'
+		,	'product_depth.numeric'				=> 'Please enter a number'
+		,	'recommended_score.numeric'			=> 'Please enter a number'		
+		,	'image_filenames.required'          => 'Images are required'
+		];
+		
+		$validator = Validator::make($request->all(),[
 			'product_name_es'			=> 'required|max:150'
 		,	'brand_id_es'				=> 'required'
 		,	'subcategories'				=> 'required'
@@ -179,81 +245,77 @@ class ProductController extends Controller
 		,	'description'				=> 'max:555'
 		,	'primary_color_display_id'  => 'required'
 		,	'image_filenames'           => 'required'
-		,	'submit_button_clicked'		=> 'required'
 		,	'product_weight'			=> 'numeric'
 		,	'product_width'				=> 'numeric'
 		,	'product_height'			=> 'numeric'
 		,	'product_depth'				=> 'numeric'
 		,	'meta_title'				=> 'max:555'
 		,	'meta_keyword'              => 'max:555'
-		]);
+		,	'recommended_score'			=> 'numeric'
+		]
+		,$messages);
 
-		//Custom settings for validations
+		// Additional validations validations
 		$validator->after(function($validator){
-		
-			$weight=array_get($validator->getData(),'weight');
-			$height=array_get($validator->getData(),'height');
-			$width=array_get($validator->getData(),'width');
-			$length=array_get($validator->getData(),'length');
+			$data = $validator->getData();
+			$weight = $data['weight'];
+			$height = $data['height'];
+			$width =  $data['width'];
+			$length = $data['length'];
 			
-			
+			// Variation details are required
 			foreach($weight as $key=>$val){
-				if(strlen($val)==0){
-					$validator->errors()->add('weight','There is an empty value for weight.');
-				}elseif(!is_numeric($val)){
-					$validator->errors()->add('weight','Invalid input for weight.');
-				}
+				if(empty($val) || !is_numeric($val))
+					$validator->errors()->add('weight\\['.$key.'\\]','Please enter a number');
 			}
 			
 			foreach($height as $key=>$val){
-				if(strlen($val)==0){
-					$validator->errors()->add('height','There is an empty value for weight.');
-				}elseif(!is_numeric($val)){
-					$validator->errors()->add('height','Invalid input for weight.');
-				}
+				if(empty($val) || !is_numeric($val))
+					$validator->errors()->add('height\\['.$key.'\\]','Please enter a number');
 			}
 			
 			foreach($width as $key=>$val){
-				if(strlen($val)==0){
-					$validator->errors()->add('width','There is an empty value for weight.');
-				}elseif(!is_numeric($val)){
-					$validator->errors()->add('width','Invalid input for weight.');
-				}
+				if(empty($val) || !is_numeric($val))
+					$validator->errors()->add('width\\['.$key.'\\]','Please enter a number');
 			}
 			
 			foreach($length as $key=>$val){
-				if(strlen($val)==0){
-					$validator->errors()->add('length','There is an empty value for weight.');
-				}elseif(!is_numeric($val)){
-					$validator->errors()->add('length','Invalid input for weight.');
-				}
+				if(empty($val) || !is_numeric($val))
+					$validator->errors()->add('length\\['.$key.'\\]','Please enter a number');				
+					// Check if there are color variations for the product		
+					if (count($data['color_variations']) > 0){				
+						foreach($data['color_variations'] as $colorDisplayId){
+							// Check if color variation has images for upload
+							if (array_key_exists($colorDisplayId, $data['image_filenames'])) {	
+								if (!empty($data['image_filenames'][$colorDisplayId])) {
+									// Check if there is selected primary image among uploaded images
+									if (!isset($data['primary_image_id'][$colorDisplayId])) {
+										$validator->errors()->add('primary_image_id\\[' . $colorDisplayId . '\\]', 'Please select the primary image among the images you selected');
+									}
+								}
+							}
+						}
+					}			
 			}
 			
 		});		
 
-		$this->updateMother($request,$model_code);
-		
-		if($validator->fails()){	
-			return response()->json([ 
-				'message' => $validator->errors(),
-				'error'=> TRUE
-				]);				
-		}else{
-			if( $this->updateVariations($request) !== TRUE){
-				return $this->updateVariations($request);
-			}else{
-				//return response()->json($request->all());
+		if($validator->fails()){
+			return redirect('product/edit/'.$model_code)->withErrors($validator)->withInput();		
+		} else {
+			dump($request->all());
+			$this->updateMother($request,$model_code);
+			$this->updateVariations($request);		
 
-				return response()->json([
-				'redirect' => $request->get('submit_button_clicked') == 'save_exit',
-				'message' => 'Your changes are saved.']);
-			}
+			return response()->json([
+			'redirect' => $request->get('submit_button_clicked') == 'save_exit',
+			'message' => 'Your changes are saved.']);
 		}
 		
 		
 	}
 	
-	private function updateMother(Request $request,$model_code)
+	private function updateMother(Request $request, $model_code)
 	{
 		if ($request->get('product_changed')){
 			$product = \App\Product::findOrFail($model_code);
@@ -301,28 +363,17 @@ class ProductController extends Controller
 		}
 	}
 	
-	private function updateVariations(Request $request)
+	private function updateVariations(Request $request, $model_code)
 	{
-		// if($request->get('primary_image_id') === NULL){
-		// 	return response()->json([
-		// 	'error' => TRUE,
-		// 	// 'redirect' => $request->get('submit_button_clicked') == 'save_exit',
-		// 	'message' => 'No primary image selected!']);
-		// }
 
 		//If request has file 
 		if($request->hasFile('images')){
 			$folderName = $this->uploadImages($request);	
 		}
-
-		// dump($request->all());
 		foreach($request->get('product_id') as $key => $value){
 			if ($request->get('variation_changed')[$key] || $request->get('product_changed')){
 				
 				$variation = \App\Variation::with('variationView')->find($key);
-				
-				// dump($variation);
-				
 				if (is_array($request->get('enable'))){
 					if (array_key_exists($key, $request->get('enable')))
 						$variation->enable = true;
@@ -366,27 +417,26 @@ class ProductController extends Controller
 					$images = $request->get('image_filenames')[$colorDisplayId];
 					$imageArray = explode('|', $images);
 					$seqNo = 2; // sequencing
-
-					// Delete current records
-					// \App\Image::where('product_id', '=', $variation->product_id)->delete();
 					
 					foreach($imageArray as $fileName){
 						if (!empty($fileName)){
 							// '1' is reserved for primary image of variation
-							$curreSeqNo = array_key_exists($colorDisplayId, $request->get('primary_image_id')) && $request->get('primary_image_id')[$colorDisplayId] == $fileName ? 1 : $seqNo++;$request->get('primary_image_id');
-							\App\Image::create([
-								'product_id' => $variation->product_id,
-								'image_full_path' => storage_path('app') . '/' . $folderName . '/' . $fileName,
-								'seq_no' => $curreSeqNo,
-								'filename' => $fileName
-							]);
+							$curreSeqNo = array_key_exists($colorDisplayId, $request->get('primary_image_id')) && $request->get('primary_image_id')[$colorDisplayId] == $fileName ? 1 : $seqNo++;
+							$image = new \App\Image();
+							$image->folder = $folderName;
+							$image->extension = strtolower(substr($fileName, strrpos($fileName, '.') + 1)); // quick copy paste xD
+							$image->model_code = $model_code;
+							$image->color_display_id = $colorDisplayId;
+							$image->image_full_path = storage_path('app') . '/' . $folderName . '/' . $fileName;
+							$image->seq_no = $curreSeqNo;
+							$image->filename = $fileName;
+							$image->save();
 							
 						}
 					}
 				}
 			}
 		}
-		return TRUE;
 	}
 	
 	// I'm too hot to handle
@@ -427,29 +477,6 @@ class ProductController extends Controller
 		
 		return $data;
 	}
-
-
-	public function getVarimage($model_code){
-		$product_images = [];
-		$product = \App\Product::with('variationsView')->findOrFail($model_code);
-		foreach($product->variationsView as $variation){
-			//Get images by product id
-			$color_images = \App\Image::where('product_id',$variation->product_id)->get();
-			foreach ($color_images as $key => $value) {
-					$product_images[] = [
-					'product_id' =>					$value->product_id,
-					'image_full_path' =>			$value->image_full_path,
-					'filename' =>					$value->filename,
-					'seq_no' =>						$value->seq_no == 1 ? "checked": NULL,
-					'primary_image_id' =>			$variation->color_display_id
-				];	
-			}
-		}
-		return response()->json($product_images);
-
-	}
-
-
 	//log
 	public function getLog($model_code)
 	{
