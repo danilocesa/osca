@@ -254,34 +254,36 @@ class ProductController extends Controller
 		,	'recommended_score'			=> 'numeric'
 		]
 		,$messages);
-
+			
+		
 		// Additional validations validations
 		$validator->after(function($validator){
 			$data = $validator->getData();
 			$weight = $data['weight'];
 			$height = $data['height'];
 			$width =  $data['width'];
-			$length = $data['length'];
+			$length = $data['length'];												
 			
 			// Variation details are required
-			foreach($weight as $key=>$val){
+			foreach($weight as $key=>$val){				
 				if(empty($val) || !is_numeric($val))
-					$validator->errors()->add('weight\\['.$key.'\\]','Please enter a number');
+					$validator->errors()->add('weight['.$key.']','Please enter a number');
 			}
 			
 			foreach($height as $key=>$val){
 				if(empty($val) || !is_numeric($val))
-					$validator->errors()->add('height\\['.$key.'\\]','Please enter a number');
+					$validator->errors()->add('height['.$key.']','Please enter a number');
 			}
 			
 			foreach($width as $key=>$val){
 				if(empty($val) || !is_numeric($val))
-					$validator->errors()->add('width\\['.$key.'\\]','Please enter a number');
+					$validator->errors()->add('width['.$key.']','Please enter a number');
 			}
 			
 			foreach($length as $key=>$val){
 				if(empty($val) || !is_numeric($val))
-					$validator->errors()->add('length\\['.$key.'\\]','Please enter a number');				
+					$validator->errors()->add('length['.$key.']','Please enter a number');				
+					
 					// Check if there are color variations for the product		
 					if (count($data['color_variations']) > 0){				
 						foreach($data['color_variations'] as $colorDisplayId){
@@ -301,9 +303,15 @@ class ProductController extends Controller
 		});		
 
 		if($validator->fails()){
-			return redirect('product/edit/'.$model_code)->withErrors($validator)->withInput();		
+			return redirect('product/edit/'.$model_code)
+						->with('weight',array_get($validator->getData(),'weight'))
+						->with('height',array_get($validator->getData(),'height'))
+						->with('width',array_get($validator->getData(),'width'))
+						->with('length',array_get($validator->getData(),'length'))
+						->withErrors($validator,'errmess')
+						->withInput();		
 		} else {
-			dump($request->all());
+			//dump($request->all());
 			$this->updateMother($request,$model_code);
 			$this->updateVariations($request);		
 
