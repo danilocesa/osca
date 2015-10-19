@@ -138,7 +138,7 @@
     @endif
 	
 	<div class="text-right">
-		{!! str_replace('/?', '?', $products->render()) !!}
+		{!! str_replace('/?', '?', $products->appends(['product_search' => \Request::get('product_search') ])->render()) !!}
 	</div>
 @endsection
 

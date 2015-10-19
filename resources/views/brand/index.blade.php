@@ -8,22 +8,6 @@
 @endsection
 
 @section('content')
-<!--div id="top_head"-->
-	<!--div class="col-lg-6">
-	</div-->
-	<!--div class="col-lg-6" align="right">
-		<div class="input-group" id="vb_search">
-		<form action="{{ url('brand/search') }}" method="get">
-			<input type="text" class="form-control" name="brand_search" placeholder="Search for brands.." />
-			<span class="input-group-btn">
-				<button type="submit" class="btn btn-default">
-					<span class="glyphicon glyphicon-search" />
-				</button>
-			</span>
-		</form>
-		</div>
-	<!--/div-->
-<!--/div-->
 	<div class="panel panel-default" id="vb_head">
 		  <!-- Default panel contents -->
 			<div name="head">	
@@ -141,7 +125,7 @@
 		<div class="col-sm-5 text-left">
 		</div>
 		<div class="col-sm-7 text-right" id="vb_foot_pgn8">
-				{!! str_replace('/?', '?', $brands->render()) !!}
+				{!! str_replace('/?', '?', $brands->appends(['brand_search' => \Request::get('brand_search')])->render()) !!}
 		</div>				
 	</div>
 @endsection

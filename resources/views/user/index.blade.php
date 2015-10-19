@@ -142,7 +142,7 @@
 		  </table>
 		<!--/form-->
 		<div class="col-sm-6 text-right" id="vb_foot_pgn8" style="margin:0;">
-				{!! str_replace('/?', '?', $users->render()) !!}
+				{!! str_replace('/?', '?', $users->appends(['user_search' => \Request::get('user_search') ])->render()) !!}
 		</div>	
 	</div>
 
