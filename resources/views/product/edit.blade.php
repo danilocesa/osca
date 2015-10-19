@@ -9,7 +9,6 @@
 
 @section('content')
 <!-- temp message -->
-{{ dump($errors->toArray()) }}
 <form method="POST" id="edit-product-form" class="form-horizontal" enctype="multipart/form-data" action="{{ url('product/edit/' . $item['model_code']) }}">
 	{!! csrf_field() !!}
 	<input type="hidden" name="_method" value="PUT">

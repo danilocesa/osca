@@ -35,6 +35,9 @@
 				
 				$lg[]=Session::get('length');								
 				$length=array_get($lg[0],$prod_id);
+				
+				dump($errors);
+								 
 			?>					
 			<tr data-product-id="{{ $variation['product_id'] }}">
 				<td>
@@ -59,7 +62,7 @@
 						<div class="input-group-addon">KG</div>
 					</div>
 					<div class="error-message">
-						{{ $errors->errmess->first('weight['.$variation["product_id"].']') }}												
+						{{ $errors->messages->first('weight['.$variation["product_id"].']') }}												
 					</div>
 				</td>
 				<td width="110" class="length">
