@@ -116,9 +116,12 @@ tr.category-item, tr.subcategory-item{
 		<td colspan="2">
 			<form class="form-inline" id="add-world-form" action="{{ url('category/add-world') }}" method="post">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="world_name" name="world_name" placeholder="World name"/>
-				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
-				<input type="button" class="cancel-world cancel-add-btn btn btn-default btn-xs" value="Cancel">
+				<div id="world_name">
+					<input class="form-control" type="text" name="world_name" placeholder="World name"/>
+					<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
+					<input type="button" class="cancel-world cancel-add-btn btn btn-default btn-xs" value="Cancel">
+				</div>
+								
 			</form>
 		</td>
 	</tr>
@@ -130,9 +133,12 @@ tr.category-item, tr.subcategory-item{
 			<form class="form-inline" id="edit-world-form" action="{{ url('category/edit-world') }}/@{{ world_id }}" method="post">
 				<input type="hidden" name="_method" value="PUT">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="world_name" name="world_name" value="@{{ world_name }}"/>
-				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
-				<input type="button" class="cancel-world cancel-edit-btn btn btn-default btn-xs" data-wn="@{{ world_name }}" data-wid="@{{ world_id }}" value="Cancel">
+				<div id="world_name">
+					<input class="form-control" type="text" name="world_name" value="@{{ world_name }}"/>
+					<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
+					<input type="button" class="cancel-world cancel-edit-btn btn btn-default btn-xs" data-wn="@{{ world_name }}" data-wid="@{{ world_id }}" value="Cancel">
+				</div>
+				
 			</form>
 		</td>
 	</tr>
@@ -141,11 +147,13 @@ tr.category-item, tr.subcategory-item{
 <script id="add-category-form-template" type="text/x-handlebars-template">
 	<tr>
 		<td colspan="2">
-			<form class="form-inline" id="add-category-form" action="{{ url('category/add-category') }}/@{{ world_id }}" method="post">
+			<form class="form-inline" id="add-category-form" action="{{ url('category/add-category') }}/@{{ world_id }}" method="post">				
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="category_name" name="category_name" placeholder="Category name"/>
-				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
-				<input type="button" class="cancel-category cancel-add-btn btn btn-default btn-xs" value="Cancel">
+				<div id="category_name" >
+					<input class="form-control" type="text" name="category_name" placeholder="Category name"/>
+					<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
+					<input type="button" class="cancel-category cancel-add-btn btn btn-default btn-xs" value="Cancel">
+				</div>				
 			</form>
 		</td>
 	</tr>
@@ -157,9 +165,12 @@ tr.category-item, tr.subcategory-item{
 			<form class="form-inline" id="edit-category-form" action="{{ url('category/edit-category') }}/@{{ world_id }}/@{{ category_id }}" method="post">
 				<input type="hidden" name="_method" value="PUT">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="category_name" name="category_name" value="@{{ category_name }}"/>
-				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
-				<input type="button" class="cancel-category cancel-edit-btn btn btn-default btn-xs" data-cn="@{{ category_name }}" data-wid="@{{ world_id }}" data-cid="@{{ category_id }}" value="Cancel">
+				<div id="category_name" >
+					<input class="form-control" type="text" name="category_name" value="@{{ category_name }}"/>
+					<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
+					<input type="button" class="cancel-category cancel-edit-btn btn btn-default btn-xs" data-cn="@{{ category_name }}" data-wid="@{{ world_id }}" data-cid="@{{ category_id }}" value="Cancel">
+				</div>
+				
 			</form>
 		</td>
 	</tr>
@@ -170,9 +181,11 @@ tr.category-item, tr.subcategory-item{
 		<td colspan="2">
 			<form class="form-inline" id="add-subcategory-form" action="{{ url('category/add-subcategory') }}/@{{ category_id }}" method="post">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="subcategory_name" name="subcategory_name" placeholder="Subcategory name"/>
-				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
-				<input type="button" class="cancel-subcategory cancel-add-btn btn btn-default btn-xs" value="Cancel">
+				<div id="subcategory_name">
+					<input class="form-control" type="text" name="subcategory_name" placeholder="Subcategory name"/>
+					<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
+					<input type="button" class="cancel-subcategory cancel-add-btn btn btn-default btn-xs" value="Cancel">
+				</div>				
 			</form>
 		</td>
 	</tr>
@@ -184,9 +197,11 @@ tr.category-item, tr.subcategory-item{
 			<form class="form-inline" id="edit-subcategory-form" action="{{ url('category/edit-subcategory') }}/@{{ category_id }}/@{{ subcategory_id }}" method="post">
 				<input type="hidden" name="_method" value="PUT">
 				{!! csrf_field() !!}
-				<input class="form-control" type="text" id="subcategory_name" name="subcategory_name" value="@{{ subcategory_name }}"/>
-				<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
-				<input type="button" class="cancel-subcategory cancel-edit-btn btn btn-default btn-xs" data-scn="@{{ subcategory_name }}" data-cid="@{{ category_id }}" data-scid="@{{ subcategory_id }}" value="Cancel">
+				<div id="subcategory_name">
+					<input class="form-control" type="text" name="subcategory_name" value="@{{ subcategory_name }}"/>
+					<input type="submit" class="btn btn-primary btn-xs" value="Save"/>					
+					<input type="button" class="cancel-subcategory cancel-edit-btn btn btn-default btn-xs" data-scn="@{{ subcategory_name }}" data-cid="@{{ category_id }}" data-scid="@{{ subcategory_id }}" value="Cancel">
+				</div>				
 			</form>
 		</td>
 	</tr>
@@ -354,17 +369,17 @@ $(document).ready(function(){
 		if ($(this).hasClass("cancel-world")){
 			var worldName = $(this).attr('data-wn');
 			var worldId = $(this).attr('data-wid');			
-			$(this).parent().parent().parent().after(tmpWorldItem({ world_id: worldId, world_name: worldName})).remove();		
+			$(this).parent().parent().parent().parent().after(tmpWorldItem({ world_id: worldId, world_name: worldName})).remove();		
 		} else if ($(this).hasClass("cancel-category")){
 			var categoryName = $(this).attr('data-cn');
 			var categoryId = $(this).attr('data-cid');			
 			var worldId = $(this).attr('data-wid');			
-			$(this).parent().parent().parent().after(tmpCategoryItem({ world_id: worldId, category_name: categoryName, category_id: categoryId})).remove();
+			$(this).parent().parent().parent().parent().after(tmpCategoryItem({ world_id: worldId, category_name: categoryName, category_id: categoryId})).remove();
 		} else if ($(this).hasClass("cancel-subcategory")){
 			var subcategoryName = $(this).attr('data-scn');
 			var subcategoryId = $(this).attr('data-scid');			
 			var categoryId = $(this).attr('data-cid');			
-			$(this).parent().parent().parent().after(tmpSubcategoryItem({ category_id: categoryId, subcategory_name: subcategoryName, subcategory_id: subcategoryId})).remove();
+			$(this).parent().parent().parent().parent().after(tmpSubcategoryItem({ category_id: categoryId, subcategory_name: subcategoryName, subcategory_id: subcategoryId})).remove();
 		}
 	});
   

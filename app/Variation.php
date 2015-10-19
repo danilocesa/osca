@@ -31,9 +31,16 @@ class Variation extends Model
 	{
 		return $this->hasOne('\App\VariationView', 'product_id', 'product_id');
 	}
+
 	
-	public function images()
+	public function getPrimaryImage()
 	{
-		return $this->hasMany('\App\Image', $primaryKey, $primaryKey);
+		if (is_null($this->color))
+			return null;
+			
+		return \App\Image::where('model_code', '=', $this->model_code)
+			->where('seq_no', '=', 1)
+			->where('color_display_id', '=', $this->color->color_display_id)
+			->first();
 	}
 }

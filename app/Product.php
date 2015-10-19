@@ -32,13 +32,22 @@ class Product extends Model
 		return $this->hasMany('\App\VariationView', 'model_code', 'model_code');
 	}
 	
-	public function primaryVariation()
-	{
-		return $this->hasOne('\App\Variation', 'model_code', 'primary_variation');
-	}
-	
 	public function categories()
 	{
 		return $this->belongsToMany('\App\Subcategory', 'es_item_categories', 'model_code');
+	}
+	
+	public function images()
+	{
+		return $this->hasMany('\App\Image', $primaryKey, $primaryKey);
+	}
+	
+	// Get the primary image of the primary variation of the product. Let's roll!
+	public function getPrimaryImage()
+	{
+		return \App\Image::where('model_code', '=', $this->model_code)
+			->where('seq_no', '=', 1)
+			->where('color_display_id', '=', $this->primary_color_display_id)
+			->first();
 	}
 }

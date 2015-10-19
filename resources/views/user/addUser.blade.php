@@ -22,7 +22,7 @@
 <div class="col-md-3 panel panel-heading panel-primary" style="margin: 0 0 0 100px;">
 <h3>Create User:</h3>
 
- <form method="post" action="{{ url('user\create') }}">
+ <form method="post" action="{{ url('user/create') }}">
    <div class="panel panel-default panel-body">
 	{{ csrf_field() }}
 	<div>
