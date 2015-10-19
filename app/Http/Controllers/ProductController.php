@@ -38,19 +38,22 @@ class ProductController extends Controller
     }
 	
 	//search field
-	public function getSearch()
+	public function getSearch(Request $request)
 	{	
-		if($_GET['product_search']==''){
+		$searchString = $request->get('product_search');
+		
+		if($searchString){
 			$products = \App\Product::with('brandMms', 'brandEs', 'variationsView')
 				->select(['model_code', 'product_name_mms', 'product_name_es', 'brand_id_mms', 'brand_id_es'])
+				->where('upper(product_name_mms)','like','%'.strtoupper($searchString).'%')
+				//->where('sku_barcode','like', '%'.$_GET['product_search'].'%')
+				//->orderBy('UPPER(product_name_mms)')
 				->paginate(10);
 				
 				return $this->getVariations($products);
 		}else{
 			$products = \App\Product::with('brandMms', 'brandEs', 'variationsView')
 				->select(['model_code', 'product_name_mms', 'product_name_es', 'brand_id_mms', 'brand_id_es'])
-				->where('upper(product_name_mms)','like','%'.strtoupper($_GET['product_search']).'%')
-				->orderBy('UPPER(product_name_mms)')
 				->paginate(10);
 				
 				return $this->getVariations($products);
@@ -305,7 +308,7 @@ class ProductController extends Controller
 		} else {
 			dump($request->all());
 			$this->updateMother($request,$model_code);
-			$this->updateVariations($request);		
+			$this->updateVariations($request,$model_code);		
 
 			return response()->json([
 			'redirect' => $request->get('submit_button_clicked') == 'save_exit',
@@ -365,7 +368,6 @@ class ProductController extends Controller
 	
 	private function updateVariations(Request $request, $model_code)
 	{
-
 		//If request has file 
 		if($request->hasFile('images')){
 			$folderName = $this->uploadImages($request);	
