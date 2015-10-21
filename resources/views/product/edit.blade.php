@@ -259,6 +259,17 @@
 				}
 			});
 		});*/
+		
+		var countSD=$("#description").val().length;					
+		$("#span_desc").html(countSD);
+		
+		$("#description").on("keyup",function(event){
+			event.preventDefault();				
+		
+			$("#span_desc").html(countSD);
+			
+			
+		});
 	});
 	
 	// Checks if image file name already exists in files array

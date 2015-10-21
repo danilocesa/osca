@@ -35,8 +35,9 @@ class UserController extends Controller
 	{	
 		if($_GET['user_search']==''){
 			$user = \App\User::with('role')
-								->orderBy('upper(NAME)')
-								->paginate(10);						
+						->where('status','=','6')
+						->orderBy('upper(NAME)')
+						->paginate(10);						
 		}else{
 			$user = \App\User::with('role')
 			    ->where('upper(NAME)','like','%'.strtoupper($_GET['user_search']).'%')

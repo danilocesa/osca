@@ -367,8 +367,7 @@ tr.selected{
 	background:#aef !important;
 }
 .image-files{
-	height:140px;
-	overflow:auto;
+	height:158px;
 }
 .image-files div{
 	display:inline-block;
@@ -377,4 +376,12 @@ tr.selected{
 	white-space:nowrap;
 	width:140px;
 	height:140px;
+}
+
+
+#image-holder{
+	height: 140px;
+    overflow-y: hidden;
+    overflow-x: scroll;
+    white-space: nowrap;
 }

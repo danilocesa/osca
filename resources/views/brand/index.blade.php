@@ -131,7 +131,11 @@
 		</div>
 		<div class="col-sm-7 text-right" id="vb_foot_pgn8">
 				{!! str_replace('/?', '?', $brands->appends(['brand_search' => \Request::get('brand_search')])->render()) !!}
+<<<<<<< HEAD
 		</div>		
+=======
+		</div>				
+>>>>>>> 5b1bd50e36910a8160959928faed71d92c56ab86
 	</div>
 @endsection
 
