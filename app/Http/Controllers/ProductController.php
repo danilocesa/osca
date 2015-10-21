@@ -314,7 +314,7 @@ class ProductController extends Controller
 						->withErrors($validator,'errmess')
 						->withInput();		
 		} else {
-			//dump($request->all());
+			// dump($request->all());
 			$this->updateMother($request,$model_code);
 			$this->updateVariations($request,$model_code);		
 
@@ -423,11 +423,38 @@ class ProductController extends Controller
 
 				//If request has file
 				if($request->hasFile('images')){
+
+
+					// Check for existing image for update seq_no column
+					$image = new \App\Image();
+					$existImage = $image->where([
+						'model_code' =>			$model_code,
+						'color_display_id' =>	$request->get('primary_color_display_id')
+					])->get();
+
+					if(count($existImage) > 0){
+						$existsID = [];
+						foreach($existImage as $key => $val)
+						{
+							$existsID[$val['filename']] = $val['seq_no'];
+						}
+						foreach ($existsID as $key => $value) {
+							$newSeqNo = $value + 1;
+							$image->where([
+								'model_code' =>			$model_code,
+								'color_display_id' =>	$request->get('primary_color_display_id'),
+								'seq_no' =>				$value,
+								'filename' =>			$key
+							])->update(['seq_no' => $newSeqNo]);
+						}
+
+
+					}
+
 					// Get image filenames under color display id
 					$images = $request->get('image_filenames')[$colorDisplayId];
 					$imageArray = explode('|', $images);
-					$seqNo = 2; // sequencing
-					
+					$seqNo = isset($existsID) ? max($existsID) + 2 : 2 ; // sequencing
 					foreach($imageArray as $fileName){
 						if (!empty($fileName)){
 							// '1' is reserved for primary image of variation
@@ -440,10 +467,44 @@ class ProductController extends Controller
 							$image->image_full_path = storage_path('app') . '/' . $folderName . '/' . $fileName;
 							$image->seq_no = $curreSeqNo;
 							$image->filename = $fileName;
+							$image->last_update_date = \DB::raw('SYSDATE');
+							$image->last_update_by = \Auth::user()->id;
 							$image->save();
 							
 						}
 					}
+				}
+				else{
+
+					//Get selected image
+					$changePrimary = [
+						'model_code' =>			$model_code,
+						'color_display_id' =>	$request->get('primary_color_display_id'),
+						'filename' =>			$request->get('primary_image_id')[$request->get('primary_color_display_id')]
+					];
+					$currImage = \App\Image::where($changePrimary)->get()->first();
+
+					// Get primary image
+					$getPrimaryImage = [
+						'model_code' =>			$model_code,
+						'color_display_id' =>	$request->get('primary_color_display_id'),
+						'seq_no' =>				1
+					];
+					$currPrimaryImage = \App\Image::where($getPrimaryImage)->get()->first();
+					
+					//Update the primary image
+					$updatePrimaryImage =[
+						'model_code' =>			$currPrimaryImage['model_code'],
+						'color_display_id' =>	$currPrimaryImage['color_display_id'],
+						'seq_no' =>				$currPrimaryImage['seq_no'],
+						'filename' =>			$currPrimaryImage['filename'],
+						'image_full_path' =>	$currPrimaryImage['image_full_path']
+					];
+					$currPrimaryImage = \App\Image::where($updatePrimaryImage)->update(['seq_no'=>$currImage['seq_no']]);
+
+					//Update the selected image to primary
+					$updateImagePrimary = \App\Image::where($changePrimary)->update(['seq_no'=>1]);
+						
 				}
 			}
 		}
@@ -503,6 +564,30 @@ class ProductController extends Controller
 			'variationrecords' => $variationrecords
 		]);
 			
+	}
+
+
+	public function deleteImages(Request $request,$model_code){
+		//Get image
+		$image = \App\Image::where([
+			'model_code' => 		$model_code,
+			'seq_no' => 			$request->get('seqNo'),
+			'filename' =>			$request->get('fileName'),
+			'color_display_id' =>	$request->get('colorDisplayID')
+		])->get()->first();
+
+		//Delete directory
+		Storage::delete($image->folder . '//' .$image->filename);
+
+		//Delete to database
+		$image = \App\Image::where([
+			'model_code' => 		$model_code,
+			'seq_no' => 			$request->get('seqNo'),
+			'filename' =>			$request->get('fileName'),
+			'color_display_id' =>	$request->get('colorDisplayID')
+		])->delete();
+
+
 	}
 
 
