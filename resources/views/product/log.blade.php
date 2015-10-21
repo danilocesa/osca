@@ -14,14 +14,13 @@
   <div class="panel-heading">Log Details</div>
 
   <div class="panel-body">
-	@if(count($productrecords)>0 && count($variationrecords)>0)
+	@if(count($productrecords)>0)
     <!-- Table -->
     <table id="log-table" class="table table-bordered table-customized">
 	  <thead>
 	    <tr>
 	      <th>Model Code</th>
 	      <th>SKU Barcode</th>
-	      <th>Environment Code</th>
 	      <th>Column Update</th>
 	      <th>Old Value</th>
 	      <th>New Value</th>
@@ -30,30 +29,15 @@
 	    </tr>
 	  </thead>
 	  <tbody>
-	    <!-- master item -->
 	    @foreach($productrecords as $productrecord)
 	    <tr>
 	      <td>{{ $productrecord['model_code'] }}</td>
-		  <td>N/A</td>
-		  <td>N/A</td>
+		  <td>{{ $productrecord['sku_barcode'] }}</td>
 		  <td>{{ $productrecord['column_update'] }}</td>
 		  <td>{{ $productrecord['old_value'] }}</td>
 		  <td>{{ $productrecord['new_value'] }}</td>
 		  <td>{{ $productrecord['update_date'] }}</td>
-		  <td>{{ $productrecord->user['name'] }}</td>
-	    </tr>
-		@endforeach
-		<!-- variation -->
-		@foreach($variationrecords as $variationrecord)
-	    <tr>
-	      <td>{{ $variationrecord['model_code'] }}</td>
-		  <td>{{ $variationrecord['sku_barcode'] }}</td>
-		  <td>{{ $variationrecord['environment_code'] }}</td>
-		  <td>{{ $variationrecord['column_update'] }}</td>
-		  <td>{{ $variationrecord['old_value'] }}</td>
-		  <td>{{ $variationrecord['new_value'] }}</td>
-		  <td>{{ $variationrecord['update_date'] }}</td>
-		  <td>{{ $variationrecord['name'] }}</td>
+		  <td>{{ $productrecord['name'] }}</td>
 	    </tr>
 		@endforeach
 	  </tbody>

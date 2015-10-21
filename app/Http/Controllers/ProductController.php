@@ -20,18 +20,18 @@ class ProductController extends Controller
      *
      * @return Response
      */
-    public function getIndex($a = '_ALL')
+    public function getIndex($a = '')
     {
 		$products = \App\Product::with('brandMms', 'brandEs', 'variationsView')
 				->select(['model_code', 'product_name_mms', 'product_name_es', 'brand_id_mms', 'brand_id_es', 'primary_color_display_id']);
 	
-		if($a == '_ALL') {
+		if($a == '') {
 			$products = $products->paginate(10);			
 			return $this->getVariations($products);			
 		} else {
 			$a = substr(strtoupper($a), 0, 1);
 			$products = $products->where('upper(product_name_mms)','like', $a.'%')
-				->paginate(10);				
+				->paginate(10);
 			return $this->getVariations($products);
 		}
 		
@@ -265,7 +265,7 @@ class ProductController extends Controller
 			$weight = $data['weight'];
 			$height = $data['height'];
 			$width =  $data['width'];
-			$length = $data['length'];												
+			$length = $data['length'];
 			
 			// Variation details are required
 			foreach($weight as $key=>$val){				
@@ -319,7 +319,7 @@ class ProductController extends Controller
 			$this->updateVariations($request,$model_code);		
 
 			return response()->json([
-			'redirect' => $request->get('submit_button_clicked') == 'save_exit',
+			'redirect' => $request->get('submit_button_clicked'), //== 'save_exit',
 			'message' => 'Your changes are saved.']);
 		}
 		
@@ -328,8 +328,10 @@ class ProductController extends Controller
 	
 	private function updateMother(Request $request, $model_code)
 	{
+		$product = \App\Product::findOrFail($model_code);
+		
 		if ($request->get('product_changed')){
-			$product = \App\Product::findOrFail($model_code);
+			//$product = \App\Product::findOrFail($model_code);
 			
 			$product->product_name_es = 	$request->get('product_name_es');
 			$product->brand_id_es = 		$request->get('brand_id_es');
@@ -370,8 +372,48 @@ class ProductController extends Controller
 			
 			$product->primary_color_display_id = $request->get('primary_color_display_id');
 			
-			$product->save();
+			//added
+			$product->last_update_date = \DB::raw('SYSDATE');
+			$product->last_update_by = \Auth::user()->id;
+			
+			//$product->save();
 		}
+		
+			//added 20-OCT-2015 starts
+			//------------------------
+			
+			//$product->sell_start_date = \DB::raw('SYSDATE');
+			
+			//if ($request->get('submit_button_clicked') == 'save_exit'){
+			//	if (\Auth::user()->role->hasPermission("CAN_APPROVE_PRODUCT")){
+			//		$product->sell_start_date = \DB::raw('SYSDATE');
+			//	}
+			//}
+			
+			
+				if ($request->get('submit_button_clicked') == 'save_exit'){
+					if (\Auth::user()->role->hasPermission("CAN_APPROVE_PRODUCT")){
+						if (is_array($request->get('approved'))) //&& array_key_exists($key, $request->get('approved')))
+							$status_id = \App\Status::getStatusId('Approved');
+						else
+							$status_id = \App\Status::getStatusId('For Approval');
+					} else {
+						$status_id = \App\Status::getStatusId('For Approval');
+					}
+				} else if ($request->get('submit_button_clicked') == 'save_keep_editing'){
+					$status_id = \App\Status::getStatusId('Updated');
+				}
+				dump($status_id);
+				if($status_id == 2 ){
+					$product->sell_start_date = \DB::raw('SYSDATE');
+					dump($product->sell_start_date);
+				}//else{
+					//$product->sell_start_date = \DB::raw('SYSDATE');
+				//}
+				
+			$product->save();
+			//------------------------
+			//added ends - mp
 	}
 	
 	private function updateVariations(Request $request, $model_code)
@@ -383,6 +425,7 @@ class ProductController extends Controller
 		foreach($request->get('product_id') as $key => $value){
 			if ($request->get('variation_changed')[$key] || $request->get('product_changed')){
 				
+				//$product = \App\Product::findOrFail($model_code);
 				$variation = \App\Variation::with('variationView')->find($key);
 				if (is_array($request->get('enable'))){
 					if (array_key_exists($key, $request->get('enable')))
@@ -410,7 +453,6 @@ class ProductController extends Controller
 				}
 				
 				$variation->status_id = $status_id ?: 1;
-				
 				$variation->last_update_date = \DB::raw('SYSDATE');
 				$variation->last_update_by_id = \Auth::user()->id;
 
@@ -490,20 +532,14 @@ class ProductController extends Controller
 	//log
 	public function getLog($model_code)
 	{
-		$productrecords = \App\productUpdateLog::with('user')
-						->where('model_code', $model_code)
-						->orderBy('update_date')
-						->get(); //find($model_code);
-		$variationrecords = \App\variationUpdateLog::where('model_code', $model_code)
-						->orderBy('update_date')
+		$productrecords = \App\productUpdateLog::
+						where('model_code', $model_code)
+						->orderBy('update_date', 'desc')
 						->get(); //find($model_code);
 			
 		return view('product.log', [
-			'productrecords' => $productrecords,
-			'variationrecords' => $variationrecords
+			'productrecords' => $productrecords
 		]);
 			
 	}
-
-
 }

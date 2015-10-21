@@ -14,35 +14,54 @@ class CategoryController extends Controller
 		// Sort world, category, subcategory alphabetically
         $categories = \App\World::with([
 			'categories' => function($query){
-				$query->orderBy('category_name');
+				$query->orderBy('upper(category_name)');
 			},
 			'categories.subcategories' => function($query){
-				$query->orderBy('subcategory_name');
+				$query->orderBy('upper(subcategory_name)');
 			}
-		])->orderBy('world_name')->get();
+		])->orderBy('upper(world_name)')->get();
 		
 		return view('category.index', compact('categories'));
 	}
 	
 	public function postAddWorld(Request $request)
 	{
-		if ($request->ajax()){
-			$validator = Validator::make($request->all(), [
-				'world_name' => 'required|unique:LKP_WORLD|max:255'
-			]);
-			
-			if ($validator->fails()){
-				return response()->json($validator->errors(), 422);
+		$validator = Validator::make($request->all(), [
+			'world_name' => 'required|max:255'
+		]);
+		
+		//additional
+		$validator->after(function($validator){
+			$data = $validator->getData();
+			$world = $data['world_name'];
+		
+			$newWorld = \App\World::select('world_name')
+				->where('upper(world_name)', '=', strtoupper($world))
+				->count();
+				
+			if($newWorld > 0){
+				$validator->errors()->add('world_name','The world name is already taken.');
 			}
-			
-			$world = new \App\World();
-			$new_id = intval(json_decode(\App\World::select('MAX(world_id) as new_id')->get())[0]->new_id) + 1;
-			$world->world_id = $new_id;
-			$world->world_name = $request->input('world_name');
-			$world->save();
-			
-			return response()->json($world, 200);
-		}		
+		});
+		//end
+		
+		if ($validator->fails()){
+			return response()->json($validator->errors(), 422);
+		} else {
+			//added
+			if ($request->ajax()){
+				
+				$world = new \App\World();
+				$new_id = intval(json_decode(\App\World::select('MAX(world_id) as new_id')->get())[0]->new_id) + 1;
+				$world->world_id = $new_id;
+				$world->world_name = $request->input('world_name');
+				
+				$world->save();
+				
+				return response()->json($world, 200);
+			}
+		}
+		
 	}
 	
 	public function putEditWorld(Request $request, $world_id)

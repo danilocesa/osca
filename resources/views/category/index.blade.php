@@ -388,6 +388,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		var $form = $(this);
 		submitAjaxForm($form, function(data){
+			console.log(data);
 			$worldTable.append(tmpWorldItem(data));
 			$form.parent().parent().remove();
 			$(".add-world").show();
