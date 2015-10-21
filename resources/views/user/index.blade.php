@@ -8,7 +8,6 @@
 @endsection
 
 @section('content')
-
 <div id="top_head">
 		<!--<button type="button" class="btn btn-primary delete-btn" data-toggle="modal" data-target=".bs-example-modal-lg">Large modal</button>		-->
 		<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
@@ -77,7 +76,7 @@
 						<a href="{{url('user/index/Y')}}">Y</a>
 						<a href="{{url('user/index/Z')}}" style="padding-right: 10px;">Z</a>
 						<!--a href="{{url('user/index/_NONE')}}" style="border-left: 1px solid #ccc; padding: 0 5px 0 10px;">Clear</a-->
-						<a href="{{url('user/index/_ALL')}}" style="border-left: 1px solid #ccc; padding-left: 10px;">View All</a>
+						<a href="{{url('user/index/_ALL')}}" style="border-left: 1px solid #ccc; padding-left: 10px;">Clear</a>
 					</div>
 					<!--div id="vb_page_head">						
 						{!! str_replace('/?', '?', $users->render()) !!}
@@ -91,6 +90,7 @@
 			  <tr style="background-color: #C0C0C0;">	
 				<th></th>
 				<th>User</th>
+				<th>Email Address</th>
 				<th>Role</th>
 				<th></th>
 			  </tr>
@@ -98,7 +98,7 @@
 			</thead>
 			  <!-- fetch values from DB -->
 			<tbody>
-			  @if(!empty($users))
+			  @if($users->total() != 0)
 			    @foreach($users as $user)
 			      <div class="row">
 			        <tr data-bid="{{ $user->id }}" data-val="{{ $user->name }}">
@@ -108,8 +108,9 @@
 							   data-bn="{{ $user->name }}" 
 					    />
 				      </td>
-				      <td class="col-sm-5">{{$user->name}}</td>
-				      <td class="col-sm-4">{{$user->role->role_name}}</td>
+				      <td class="col-sm-3">{{$user->name}}</td>
+					  <td class="col-sm-3">{{ $user->email }}</td>
+				      <td class="col-sm-3">{{$user->role->role_name}}</td>
 				      <td class="col-sm-2">
 				    	<a href="{{ url('user/edit/'. $user->id) }}">
 				    	  Edit
@@ -140,15 +141,15 @@
 			</tbody>
 			 <!-- fetch values from DB -->
 		  </table>
-		<!--/form-->
-		<div class="col-sm-6 text-right" id="vb_foot_pgn8" style="margin:0;">
-				{!! str_replace('/?', '?', $users->render()) !!}
-		</div>	
+		<!--/form-->		
 	</div>
 
 	
 	<div name="foot" id="vb_foot" >
 		<div class="col-sm-6 text-left">
+		</div>		
+		<div class="col-sm-6 text-right" id="vb_foot_pgn8" style="margin:0;">
+				{!! str_replace('/?', '?', $users->appends(['user_search' => \Request::get('user_search')])->render()) !!}
 		</div>			
 	</div>
 	

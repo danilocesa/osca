@@ -39,7 +39,7 @@
 	</div>
 	<span style="color:red;">* </span>Confirm Password : 
 	<div>
-		<input type="password" placeholder="Confirm Password" id="password_confirmation" class="form-control" required/>
+		<input type="password" placeholder="Confirm Password" id="password_confirmation" name="password_confirmation" class="form-control" required/>
 	</div><br />
 	<div class="form-group">
       <label>

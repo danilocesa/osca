@@ -46,14 +46,34 @@ class BrandController extends Controller
 			'brands'	=> $brand
 		]);
 		
-		//return sizeof($brand);
+		//return count($brand);
 		
 	}
 	
 	public function postAddBrand(Request $request){		
-				$validator = Validator::make($request->all(), [
-				'brand_name' => 'required|unique:LKP_BRAND,brand_name|max:25'
+				
+			$validator = Validator::make($request->all(), [
+			'brand_name' => 'required|max:25'
 			]);			
+			
+			$validator->after(function($validator){
+				$brand_name=array_get($validator->getData(),'brand_name');
+				$exists=\App\Brand::where('upper(trim(BRAND_NAME))','like',strtoupper(trim($brand_name)))
+									->where('status','like','6')
+									->count();
+				if($exists > 0){
+					//You scum!					
+					$validator->errors()->add('brand_name','Brand name unavailable');					
+				}else{
+					$exists=\App\Brand::where('upper(trim(BRAND_NAME))','like',strtoupper(trim($brand_name)))
+									->where('status','like','7')
+									->count();					
+					if($exists > 0){
+						$validator->errors()->add('brand_name','Brand name was previously deleted');						
+					}
+				}
+			});
+			
 			
 			if($validator->fails()){				
 				return redirect('brand/index')->withErrors($validator)->withInput();
@@ -62,12 +82,11 @@ class BrandController extends Controller
 				$brand = new \App\Brand();
 				$new_id = intval(json_decode(\App\Brand::select('MAX(brand_id) as new_id')->get())[0]->new_id) + 1;
 				$brand->brand_id = $new_id;
-				$brand->brand_name = ucfirst(strtolower($request->input('brand_name')));
+				$brand->brand_name = trim($request->input('brand_name'),"\x00..\x1F");				
 				$brand->status=6;
 				$brand->last_update_date = \DB::raw('SYSDATE');					
 				$brand->last_update_by = \Auth::user()->id;
-				$brand->save();
-			
+				$brand->save();		 
 				$brand=\App\Brand::orderBy('BRAND_NAME')->paginate(10);			
 				return redirect('brand');
 			}
@@ -76,9 +95,31 @@ class BrandController extends Controller
 	
 	public function putEdit(Request $request, $id){				
 		
+		// $validator = Validator::make($request->all(), [
+			// 'brand_name' => 'required|unique:LKP_BRAND,brand_name|max:25'
+		// ]);			
+
 		$validator = Validator::make($request->all(), [
-			'brand_name' => 'required|unique:LKP_BRAND,brand_name|max:25'
-		]);			
+			'brand_name' => 'required|max:25'
+			]);			
+			
+			$validator->after(function($validator){
+				$brand_name=array_get($validator->getData(),'brand_name');
+				$exists=\App\Brand::where('upper(BRAND_NAME)','like',strtoupper($brand_name))
+									->where('status','like','6')
+									->count();
+				if($exists > 0){
+					//You scum!					
+					$validator->errors()->add('brand_name','Brand name unavailable');					
+				}else{
+					$exists=\App\Brand::where('upper(BRAND_NAME)','like',$brand_name)
+									->where('status','like','7')
+									->count();					
+					if($exists > 0){
+						$validator->errors()->add('brand_name','Brand name was previously deleted');						
+					}
+				}
+			});
 		
 		if($validator->fails()){
 			return redirect('brand/index')
@@ -86,7 +127,7 @@ class BrandController extends Controller
 					->withInput();
 		}else{
 				$brand = \App\Brand::find($id);
-				$brand->brand_name = ucfirst(strtolower($request->input('brand_name')));
+				$brand->brand_name = trim($request->input('brand_name'));	
 				$brand->last_update_date = \DB::raw('SYSDATE');					
 				$brand->last_update_by = \Auth::user()->id;
 				$brand->update();
