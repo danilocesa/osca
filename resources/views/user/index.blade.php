@@ -141,14 +141,9 @@
 			</tbody>
 			 <!-- fetch values from DB -->
 		  </table>
-<<<<<<< HEAD
-		<!--/form-->		
-=======
-		<!--/form-->
 		<div class="col-sm-6 text-right" id="vb_foot_pgn8" style="margin:0;">
 				{!! str_replace('/?', '?', $users->appends(['user_search' => \Request::get('user_search') ])->render()) !!}
-		</div>	
->>>>>>> 5b1bd50e36910a8160959928faed71d92c56ab86
+		</div>
 	</div>
 
 	
