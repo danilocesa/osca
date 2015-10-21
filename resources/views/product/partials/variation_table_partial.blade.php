@@ -35,8 +35,6 @@
 				
 				$lg[]=Session::get('length');								
 				$length=array_get($lg[0],$prod_id);
-				
-				dump($errors);
 								 
 			?>					
 			<tr data-product-id="{{ $variation['product_id'] }}">
