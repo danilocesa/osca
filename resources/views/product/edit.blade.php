@@ -188,11 +188,42 @@
 		$(document).on("click", ".btn-upload", function(event){
 			$imageUpload.click();
 		});
+
+		//Apply to all button
+		// $(document).on("click", "#applytoall", function(event){
+		// 	var $btn = $(this).button('loading');
+		// 	setTimeout(function () {
+		//         $btn.button('reset');
+		//     }, 3000);
+		// });
+		
 		
 		// Handling click of delete image
 		$(document).on("click", ".remove-image-link", function(event){
 			event.preventDefault();
-			console.log($(this).data('product-id'));
+			var self = this;
+			if(confirm("Are you sure you want to delete this?")){
+				var dataDelete = {
+					_token:$('input[name="_token"]').val(),
+					fileName: $(this).data('filename'),
+					seqNo:$(this).data('seq-no'),
+					'colorDisplayID':$(this).data('code-display-id')
+				};
+				$.ajax({
+					url: "{{ url('product/images/'.$item['model_code']) }}",
+					method: 'DELETE',
+					data: dataDelete,
+					success: function(data){
+
+					}
+				}).done(function() {
+				 	$(self).parent().remove();
+				});
+				
+			}
+			
+
+
 		});
 
 		// Changing of selected images for upload
@@ -259,6 +290,17 @@
 				}
 			});
 		});*/
+		
+		var countSD=$("#description").val().length;					
+		$("#span_desc").html(countSD);
+		
+		$("#description").on("keyup",function(event){
+			event.preventDefault();				
+		
+			$("#span_desc").html(countSD);
+			
+			
+		});
 	});
 	
 	// Checks if image file name already exists in files array

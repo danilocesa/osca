@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Validator;
+use DateTime;
+use Carbon;
 
 class UserController extends Controller
 {
@@ -14,20 +16,18 @@ class UserController extends Controller
 		if($a == '_ALL')
 		{ //\App\User
 			$user = \App\User::with('role')->where('status', '=', '6')
-							->orderBy ('upper(NAME)')->paginate(10);
-		//}else if ($a == '_NONE'){
-		//	$user = \App\User::with('role')->where('upper(NAME)', 'like', $a.'%')
-		//		->where('status', '=', '6')
-		//		->orderBy('upper(NAME)')->paginate(0);
+							->where('id','!=','1')
+							->orderBy ('upper(NAME)');
 		}else{
 			$a = substr(strtoupper($a), 0, 1);
 			$user = \App\User::with('role')->where('upper(NAME)', 'like', $a.'%')
 				->where('status', '=', '6')
-				->orderBy('upper(NAME)')->paginate(10);
+				->where('id','!=','1')
+				->orderBy('upper(NAME)');
 		}
 		
 		return view('user.index',[
-			'users' => $user
+			'users' => $user->paginate(10)
 		]);
 	}
 	
@@ -63,49 +63,71 @@ class UserController extends Controller
 	
 	public function postCreate(Request $request)
 	{
+	//Modified the validation
+		// Added after validation
+		// Email validation under AFTER_VALIDATION block
+		// - 10/20/2015 xiphi
+	
 		$messages = [
 			'name.required' => 'User Name field is required.',
-			//'name.unique'	=> 'User Name may be existing or previously deleted.',
 			'email.required' => 'User E-mail field is required.',
 			'password.required' => 'Password field is required.',
-			//'password_confirmed.same' => 'Password mismatch. Please try again.',
+			'password_confirmation.same' => 'Password mismatch. Please try again.',
+			'password_confirmation.required' => 'Confirm Password is required',
 			'role_desc.required' => 'Role is required.'
 		];
 		
 		$validator = Validator::make($request->all(), [
-            'name' => 'required|max:255',   //Username must be unique
+            'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:6',
+			'password_confirmation'=>'required|same:password',
 			'role_desc' => 'required'
         ], $messages );		
 		
-		$username='';
-		
+		//AFTER_VALIDATION
 		$validator->after(function($validator){
 			$data = $validator->getData();
-			$username = $data['name'];
+			$email = $data['email'];			
+													
+			//Username must be unique and not previously entered
+			$userCount=\App\User::where('upper(trim(email))','like',strtoupper(trim($email)))
+						->where('status','=','7')						
+						->count()
+			;
 			
-			//Username must be checked if Active or not
-			
+			if($userCount>0){
+				$validator->errors()->add('email','Email was previously deleted');
+			}else{
+				$userCount=\App\User::where('upper(trim(email))','like',strtoupper(trim($email)))
+						->where('status','=','6')						
+						->count()
+						;
+				
+				if($userCount>0){
+					$validator->errors()->add('email','Email unavailable');
+				}
+			}
 		});
 		
 		if($validator->fails()){
-			// return redirect('user/create')
-				// ->withErrors($validator)
-				// ->withInput();				
-				return dump($username);
-		}
-		
-		\App\User::create([
-            'name' => $request['name'],
-            'email' => $request['email'],
-            'password' => bcrypt($request['password']),
-			'role_id' => $request['role_desc'],
-			'status' => 6
-        ]);
-		
-		return redirect('user/index');
-	}
+			return redirect('user/create')
+				->withErrors($validator)
+				->withInput();								
+		}else{					
+			$user = new \App\User();						
+			$user->name 			= trim($request['name']);
+			$user->email 			= trim($request['email']);
+			$user->password 		= bcrypt($request['password']);
+			$user->role_id 			= $request['role_desc'];
+			$user->status 			= 6;
+			$user->last_update_date = \DB::raw('SYSDATE');
+			$user->last_update_by 	= \Auth::user()->id;	
+			$user->save();
+			
+			return redirect('user/index');
+		}   
+	}       
 	
 	//edit user
 	public function getEdit($id)
@@ -121,30 +143,38 @@ class UserController extends Controller
 	
 	public function putEdit(Request $request, $id)
 	{
+	//Modified the following validations
+		// Email has been removed while editing. User may only view the inputted email.
+		// - 10/20/2015 xiphi
+	
 		$messages = [
-			'name.required' => 'User Name is required.',
-			'email.required' => 'User E-mail is required.',
-			'password.required' => 'Password is required.',
-			'role_desc.required' => 'Role is required.'
+			'name.required' 					=> 'User Name field is required.',
+			'password.required' 				=> 'Password field is required.',
+			'password_confirmation.same' 		=> 'Password mismatch. Please try again.',
+			'password_confirmation.required' 	=> 'Confirm Password is required',
+			'role_desc.required' 				=> 'Role is required.'
 		];
 		
-		$validator = Validator::make($request->all(), [
-            'name' => 'required|max:255',
-            'email' => 'required|email|max:255',
-            'password' => 'required|min:6',
-			'role_desc' => 'required'
+		$validator = Validator::make($request->all(), [           
+
+			'name' 					=> 'required|max:255',   
+            'password' 				=> 'required|min:6',
+			'password_confirmation'	=> 'required|same:password',
+			'role_desc' 			=> 'required'
         ], $messages );
 		
+		
 		if($validator->fails()){
-			return redirect('user/create')
+			return redirect('user/edit/'.$id)
 				->withErrors($validator)
 				->withInput();
 		}else {
 			$user = \App\User::find($id);
-			$user->name = $request->get('name');
-			$user->email = $request->get('email');
-			$user->password = $request->get('password');
-			$user->role_id = $request->get('role_desc');
+			$user->name 			= trim($request['name']);
+			$user->password 		= bcrypt($request['password']);
+			$user->role_id 			= $request['role_desc'];
+			$user->last_update_date = \DB::raw('SYSDATE');
+			$user->last_update_by 	= \Auth::user()->id;						
 			$user->update();
 		
 			return redirect('user');
@@ -161,10 +191,6 @@ class UserController extends Controller
 			return redirect('user');
 		}else{
 			$data = \App\User::wherein('id', $checks)->get();
-			
-			//return view('user.delete',[
-				//'detail' => $data
-			//]);
 			return redirect('user');
 		}
 	}
