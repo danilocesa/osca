@@ -16,13 +16,13 @@ class BrandController extends Controller
 		if($a =='_ALL'){
 			$brand=\App\Brand::select('brand_id','brand_name','(select count(1) from es_item_master eim join es_item_variation eiv on eim.model_code=eiv.model_code where brand_id_es=brand_id) brand_count')
 								->where('status','=','6')
-								->orderBy('upper(BRAND_NAME)')->paginate(10);						
+								->orderBy('BRAND_NAME')->paginate(10);						
 		}else{
 			//$a=substr($a,0,1); //URL control
 			$brand=\App\Brand::select('brand_id','brand_name','(select count(1) from es_item_master eim join es_item_variation eiv on eim.model_code=eiv.model_code where brand_id_es=brand_id) brand_count')
-				->where('upper(BRAND_NAME)','like',$a.'%')
+				->where('BRAND_NAME','like',$a.'%')
 				->where('status','=','6')
-				->orderBy('upper(BRAND_NAME)')->paginate(10);
+				->orderBy('BRAND_NAME')->paginate(10);
 		}
 		return view('brand.index',[
 			'brands'	=>	$brand

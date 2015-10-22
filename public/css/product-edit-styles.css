@@ -348,9 +348,9 @@ table#variation-table tr td, table#variation-table th{
 	display:none;
 }
 
-#submit-buttons{
+/*#submit-buttons{
 	display:none;
-}
+}*/
 
 table#variation-primary-table th, table#variation-primary-table td{
 	font-size:0.75em;
