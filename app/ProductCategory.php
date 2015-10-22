@@ -12,5 +12,5 @@ class ProductCategory extends Model
 	
 	public $timestamps = false;
 	
-	protected $fillable = ['model_code', 'subcategory_id'];
+	protected $fillable = ['model_code', 'subcategory_id', 'last_update_date', 'last_update_by'];
 }

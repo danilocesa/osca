@@ -20,31 +20,13 @@ class BrandController extends Controller
 								
 			$brand=\App\Brand::select('brand_id','brand_name')
 								->where('status','=','6')
-								//->where('brand_id','14')
-								->orderBy('BRAND_NAME');	
-			 // $brand=DB::select(DB::raw('select  brand_id,brand_name,nvl(cnt,0)as brand_count from lkp_brand b left OUTER join( 
-						// select 
-							// brand_id_es,
-							// count(1) cnt
-							// from es_item_master eim        
-							// left join es_item_variation eiv
-								// on eim.model_code = eiv.model_code
-							// group by
-								// brand_id_es
-						   // )bs
-						   // on b.brand_id=bs.brand_id_es
-						// where 1=1
-						// and brand_id=14
-						// and status=6'));
+								->orderBy('BRAND_NAME')->paginate(10);						
 		}else{
 			//$a=substr($a,0,1); //URL control
-			// $brand=\App\Brand::select('brand_id','brand_name','count(*) as brand_count')
-				// ->leftjoin('es_item_master as eim','eim.brand_id_es','brand_id')
-			$brand=\App\Brand::select('brand_id','brand_name')
-								// ->where('status','=','6')
-				->where('upper(BRAND_NAME)','like',$a.'%')
+			$brand=\App\Brand::select('brand_id','brand_name','(select count(1) from es_item_master eim join es_item_variation eiv on eim.model_code=eiv.model_code where brand_id_es=brand_id) brand_count')
+				->where('BRAND_NAME','like',$a.'%')
 				->where('status','=','6')
-				->orderBy('upper(BRAND_NAME)');				
+				->orderBy('BRAND_NAME')->paginate(10);
 		}
 		return view('brand.index',[
 			'brands'	=>	$brand->paginate(10)

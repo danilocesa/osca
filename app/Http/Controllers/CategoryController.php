@@ -164,4 +164,10 @@ class CategoryController extends Controller
 			return response()->json($subcategory, 200);
 		}
 	}
+	
+	public function postMoveProduct()
+	{
+		//
+		return response()->json($subcategory, 200);
+	}
 }

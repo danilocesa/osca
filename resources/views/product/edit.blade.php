@@ -8,7 +8,15 @@
 @endsection
 
 @section('content')
+
 <!-- temp message -->
+@if (session('status'))
+    <div class="alert alert-success">
+        {{ session('status') }}
+    </div>
+@endif
+
+
 <form method="POST" id="edit-product-form" class="form-horizontal" enctype="multipart/form-data" action="{{ url('product/edit/' . $item['model_code']) }}">
 	{!! csrf_field() !!}
 	<input type="hidden" name="_method" value="PUT">
@@ -129,6 +137,10 @@
 		// Pre-select subcategories for the current product
 		var preSelectedSubcategories = [];
 		
+		//initialize for description and short description
+		var descCount	=	(555 - $("#description").val().length);
+		var shortDC		=	(555 - $("#short_description").val().length);
+		
 		@foreach($item['categories'] as $category)
 		preSelectedSubcategories.push({{ $category->subcategory_id }});
 		@endforeach
@@ -158,16 +170,20 @@
 			minimumInputLength: 1
 		});
 		
+		$("#edit-hex-code").text($("input[name=primary_color_display_id]:checked").parent().parent().data('hex-code'));
+
 		// Handling changes on product
 		$(document).on("change", ".watch-product-changes", function(event){
 			$productChanged.val(1);
-			$submitButtons.css("display", "inline-block");
+			// $submitButtons.css("display", "inline-block");
+			$('a.btn-submit').removeAttr("disabled");
 		});
 		
 		// Handling changes on product variation
 		$(document).on("change", ".watch-variation-changes", function(event){
 			$(this).parent().parent().parent().find("td:first-child > div > input.variation_changed").val(1);
-			$submitButtons.css("display", "inline-block");
+			// $submitButtons.css("display", "inline-block");
+			$('a.btn-submit').removeAttr("disabled");
 		});
 		
 		// Changing of primary variation (radio button)
@@ -182,6 +198,7 @@
 			
 			$(".color-variation-images").hide();
 			$(".color-variation-images[data-code-display-id=\"" + $(this).attr("data-code-display-id") + "\"]").show();
+			$("#edit-hex-code").text($(this).data('hex-code'));
 		});
 		
 		// Handling click of upload button
@@ -203,22 +220,30 @@
 			event.preventDefault();
 			var self = this;
 			if(confirm("Are you sure you want to delete this?")){
-				var dataDelete = {
-					_token:$('input[name="_token"]').val(),
-					fileName: $(this).data('filename'),
-					seqNo:$(this).data('seq-no'),
-					'colorDisplayID':$(this).data('code-display-id')
-				};
-				$.ajax({
-					url: "{{ url('product/images/'.$item['model_code']) }}",
-					method: 'DELETE',
-					data: dataDelete,
-					success: function(data){
+				if($(this).data('filename') === undefined){
+					$(self).parent().remove();
+				}
+				else{
+					var dataDelete = {
+							_token:$('input[name="_token"]').val(),
+							fileName: $(this).data('filename'),
+							seqNo:$(this).data('seq-no'),
+							'colorDisplayID':$(this).data('code-display-id')
+					};
 
-					}
-				}).done(function() {
-				 	$(self).parent().remove();
-				});
+					$.ajax({
+						url: "{{ url('product/images/'.$item['model_code']) }}",
+						method: 'DELETE',
+						data: dataDelete,
+						success: function(data){
+
+						}
+					}).done(function() {
+					 	$(self).parent().remove();
+					});
+					
+				}
+
 				
 			}
 			
@@ -256,12 +281,17 @@
 		
 		// Handling click of one any submit button
 		$submitButtons.on("click", "a.btn-submit", function(event){
+			if($(this).attr('disabled') != 'disabled'){
+
 			event.preventDefault();
 		
 			$submitButtonClicked.val($(this).attr("data-value"));
 			
 			if (confirm("Continue?"))
 				$("form#edit-product-form").submit();
+
+			}
+			
 		});
 		
 		// Handling click of apply to all variations button
@@ -290,17 +320,38 @@
 				}
 			});
 		});*/
+
+		//count length for short-description
+		if(shortDC > 555){
+			shortDC=0;
+		}
+		$("#count_sd").html(shortDC);
+		$("#short_description").on("keyup",function(event){
+			event.preventDefault();				
+			
+			if($("#short_description").val().length <= 555){
+				$("#count_sd").html(555 - $("#short_description").val().length);
+			}else{
+				$("#count_sd").html(0);
+			}					
+		});
 		
-		var countSD=$("#description").val().length;					
-		$("#span_desc").html(countSD);
 		
+		//count length for description	
+		if(descCount > 555){
+				descCount=0;
+		}
+		$("#count_desc").html(descCount);
 		$("#description").on("keyup",function(event){
 			event.preventDefault();				
-		
-			$("#span_desc").html(countSD);
 			
-			
+			if($("#description").val().length <= 555){
+				$("#count_desc").html(555 - $("#description").val().length);
+			}else{
+				$("#count_desc").html(0);
+			}					
 		});
+					
 	});
 	
 	// Checks if image file name already exists in files array
