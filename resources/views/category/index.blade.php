@@ -104,10 +104,24 @@ tr.category-item, tr.subcategory-item{
 	<br />
 	<div class="text-right">
 		<a href="#" class="add-subcategory add-item-btn btn btn-default btn-sm">Add new subcategory</a>
-		<a href="#" class="btn btn-default btn-sm">Move products</a>
+		<!-- edited for move products test -->
+		<a href="#" class="btn-move-products btn btn-default btn-sm" data-toggle="modal" data-target=".move-product-modal">Move products</a>
+		<!-- end for move products test -->
 	</div>
+
 </div>
 </div>
+
+<!-- edited for move products test -->
+  <div class="modal fade move-product-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog modal-lg">
+	  <div class="modal-content" id="mp_div">
+	  
+	  </div>
+	</div>
+  </div>
+<!-- end for move products test -->
+
 @endsection
 
 @section('scripts')
@@ -237,6 +251,21 @@ tr.category-item, tr.subcategory-item{
 	</tr>
 </script>
 
+<!-- edited for move products test -->
+<script id="move-products-template" type="text/x-handlebars-template">
+  <form action="#" method="post">
+    <div class="modal-header">
+	  <button type="button" class="close" data-dismiss="modal">
+	    <span class="glyphicon glyphicon-remove" aria-hidden="true"> </span>
+	  </button>
+	  <h3 class="modal-title">Products list to Move:</h3>
+	</div>
+	<div class="">
+	</div>
+  </form>
+</script>
+<!-- end for move products test -->
+
 <script>
 // Templates
 var tmpAddWorldForm = Handlebars.compile($("#add-world-form-template").html());
@@ -254,7 +283,6 @@ var tmpSubcategoryItem = Handlebars.compile($("#subcategory-item-template").html
 var $worldTable = $("table#world-table tbody");
 var $categoryTable = $("table#category-table tbody");
 var $subcategoryTable = $("table#subcategory-table tbody");
-
 
 $(document).ready(function(){
 
