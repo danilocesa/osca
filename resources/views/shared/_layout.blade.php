@@ -21,5 +21,26 @@
 	{!! HTML::script('js/jquery.ajaxFormCustom.js') !!}
 	{!! HTML::script('js/select2.min.js') !!}
 	@yield('scripts')	
+<script>	
+	idleTimer = null;	
+	idleState = false;
+	idleWait = 7200000;
+	(function ($) {
+	    $(document).ready(function () {
+	        $('*').bind('mousemove keydown scroll', function () {
+	            clearTimeout(idleTimer);
+	            idleState = false;
+	            idleTimer = setTimeout(function () { 
+	            	alert("You've been idle for 5 seconds");
+	            	 {{ Auth::logout() }}
+	            	window.location.reload();
+	                idleState = true; }, idleWait);
+	        });
+	        
+	        $("body").trigger("mousemove");
+	    
+	    });
+	}) (jQuery)
+</script>	
 </body>
 </html>

@@ -60,7 +60,7 @@
 						<div class="input-group-addon">KG</div>
 					</div>
 					<div class="error-message">
-						{{ $errors->messages->first('weight['.$variation["product_id"].']') }}												
+						{{ $errors->errmess->first('weight['.$variation["product_id"].']') }}												
 					</div>
 				</td>
 				<td width="110" class="length">
