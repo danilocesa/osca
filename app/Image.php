@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Storage;
+use File;
 
 class Image extends Model
 {
@@ -18,8 +19,25 @@ class Image extends Model
 
 	public function createImageTag()
 	{
-		$blob = Storage::get($this->folder . '//' . $this->filename);
-		return '<img src="data:image/' . $this->extension . ';base64,' . base64_encode($blob) . '" />';
+		
+		$envFolder = substr($this->image_full_path, 0,24);
+		$rootPath = substr(base_path(),0,24);
+		$contents = File::exists($this->image_full_path);
+		//If file exists in the storage path
+		if($contents === true){
+			//For changing env path
+			if($envFolder == $rootPath){
+			$blob = Storage::get($this->folder . '//' . $this->filename);
+			return '<img src="data:image/' . $this->extension . ';base64,' . base64_encode($blob) . '" />';	
+			}
+			else{
+				return 'No image';	
+			}	
+		} else{
+			return 'No image';
+		}
+		
+		
 	}
 
 

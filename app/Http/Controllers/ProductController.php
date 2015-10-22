@@ -141,7 +141,6 @@ class ProductController extends Controller
 				'color_code' => 		empty($variation->color_code) ? '(No color)' : $variation->color_code,
 				'color_display_id' => 	empty($variation->color_display_id) ? '(No color)' : $variation->color_display_id,
 				'color_display_name' => empty($variation->color_display_name) ? '(No color)' : $variation->color_display_name,
-				'color_hex_code' =>		$variation->color_hex_code,
 				'size_name' => 			empty($variation->size_name) ? '(No size)' : $variation->size_name,
 				'size_code' => 			empty($variation->size_code) ? '(No size)' : $variation->size_code,
 				'sku_barcode' => 		$variation->sku_barcode,
@@ -173,7 +172,8 @@ class ProductController extends Controller
 
 				$color_variations[$variation->color_display_id] = [
 					'color_display_name' => empty($variation->color_display_name) ? '(No color)' : $variation->color_display_name,
-					'variation_images' => $variationImages
+					'variation_images' => 	$variationImages,
+					'color_hex_code' =>		$variation->color_hex_code
 				];
 			}
 			
@@ -211,6 +211,7 @@ class ProductController extends Controller
 			'categories' => 				$product->categories,
 			'shipping_group' => 			$product->shipping_group,
 		];
+
 		return view('product.edit', compact('item', 'categories', 'ages', 'product_styles', 'genders', 'worlds', 'color_variations'));
 	}
 	
@@ -293,7 +294,8 @@ class ProductController extends Controller
 								if (!empty($data['image_filenames'][$colorDisplayId])) {
 									// Check if there is selected primary image among uploaded images
 									if (!isset($data['primary_image_id'][$colorDisplayId])) {
-										$validator->errors()->add('primary_image_id\\[' . $colorDisplayId . '\\]', 'Please select the primary image among the images you selected');
+										// $validator->errors()->add('primary_image_id\\[' . $colorDisplayId . '\\]', 'Please select the primary image among the images you selected');
+										$validator->errors()->add('primary_image_id', 'Please select the primary image among the images you selected');
 									}
 								}
 							}
@@ -313,7 +315,8 @@ class ProductController extends Controller
 						->withInput();		
 		} else {
 			$this->updateMother($request,$model_code);
-			$noImageuploaded = $this->updateVariations($request,$model_code);		
+			$noImageuploaded = $this->updateVariations($request,$model_code);
+			
 			if($noImageuploaded === TRUE){
 				return back()->with('imageUpload', 'Image(s) required.');
 			}
@@ -325,9 +328,6 @@ class ProductController extends Controller
 			// 'message' => 'Your changes are saved.']);
 
 			// return back()->with('status', 'Your changes are saved.');
-			// return $this->updateVariations($request,$model_code);
-
-			
 		}
 
 	}
@@ -409,6 +409,7 @@ class ProductController extends Controller
 		if($request->hasFile('images')){
 			$folderName = $this->uploadImages($request);	
 		}
+
 		foreach($request->get('product_id') as $key => $value){
 			if ($request->get('variation_changed')[$key] || $request->get('product_changed')){
 				
@@ -452,8 +453,6 @@ class ProductController extends Controller
 
 				//If request has file
 				if($request->hasFile('images')){
-
-
 					// Check for existing image for update seq_no column
 					$image = new \App\Image();
 					$existImage = $image->where([
@@ -505,11 +504,11 @@ class ProductController extends Controller
 				}
 				//If request has no uploaded file
 				else{
-					//If variation is no color
+					//If variation is no color option
 					if($request->get('primary_color_display_id') > 0){
 						//If there is no image in the primary variation
 						if(@$request->get('primary_image_id')[$request->get('primary_color_display_id')] === NULL){
-							return $noImageuploaded = TRUE;
+							$noImageuploaded = TRUE;
 						}
 						else{
 							//Get selected image
@@ -519,7 +518,7 @@ class ProductController extends Controller
 								'filename' =>			@$request->get('primary_image_id')[$request->get('primary_color_display_id')]
 							];
 							$currImage = \App\Image::where($changePrimary)->get()->first();
-
+							return $currImage;
 							// Get primary image
 							$getPrimaryImage = [
 								'model_code' =>			$model_code,
@@ -540,9 +539,10 @@ class ProductController extends Controller
 
 							//Update the selected image to primary
 							$updateImagePrimary = \App\Image::where($changePrimary)->update(['seq_no'=>1]);	
+							return FALSE;
 						}	
 					}
-					
+					return $noImageuploaded;
 				}
 			}
 		}

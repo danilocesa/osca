@@ -170,6 +170,8 @@
 			minimumInputLength: 1
 		});
 		
+		$("#edit-hex-code").text($("input[name=primary_color_display_id]:checked").parent().parent().data('hex-code'));
+
 		// Handling changes on product
 		$(document).on("change", ".watch-product-changes", function(event){
 			$productChanged.val(1);
@@ -196,6 +198,7 @@
 			
 			$(".color-variation-images").hide();
 			$(".color-variation-images[data-code-display-id=\"" + $(this).attr("data-code-display-id") + "\"]").show();
+			$("#edit-hex-code").text($(this).data('hex-code'));
 		});
 		
 		// Handling click of upload button
@@ -222,10 +225,10 @@
 				}
 				else{
 					var dataDelete = {
-						_token:$('input[name="_token"]').val(),
-						fileName: $(this).data('filename'),
-						seqNo:$(this).data('seq-no'),
-						'colorDisplayID':$(this).data('code-display-id')
+							_token:$('input[name="_token"]').val(),
+							fileName: $(this).data('filename'),
+							seqNo:$(this).data('seq-no'),
+							'colorDisplayID':$(this).data('code-display-id')
 					};
 
 					$.ajax({
@@ -278,7 +281,6 @@
 		
 		// Handling click of one any submit button
 		$submitButtons.on("click", "a.btn-submit", function(event){
-			console.log($(this).attr('disabled'));
 			if($(this).attr('disabled') != 'disabled'){
 
 			event.preventDefault();
