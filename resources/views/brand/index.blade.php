@@ -88,14 +88,17 @@
 			<tbody>
 			@if($brands->total() != 0)
 				  @foreach($brands as $brand)
+				<?php
+					$brand_count=DB::select(DB::raw('select count(*) brand_count from es_item_master eim join es_item_variation eiv on eim.model_code = eiv.model_code where eim.brand_id_es='.$brand->brand_id));
+				  ?>
 				  <div class="row">
-				  <tr data-bid="{{ $brand->brand_id }}" data-val="{{$brand->brand_count}}">
+				  <tr data-bid="{{ $brand->brand_id }}" data-val="{{ $brand_count[0]->brand_count }}">
 					<td class="col-sm-1" align="center">
 						<input type="checkbox" name="check[]" id="checks" value="{{ $brand->brand_id }}" data-bn="{{$brand->brand_name}}"/>				  
 					</td>
-					<td class="col-sm-5">{{$brand->brand_name}}</td>     
-					<td class="col-sm-4">{{ $brand->brand_count}}</td>     
-					<td class="col-sm-2"><a class="edit-brand edit-brand-link" href="{{url('brand/edit/')}}/{{ $brand->brand_id }}" data-bid="{{ $brand->brand_id }}" data-bn="{{ $brand->brand_name }}" data-val="{{$brand->brand_count}}">Edit</a></td>     
+					<td class="col-sm-5">{{ $brand->brand_name }}</td>     
+					<td class="col-sm-4">{{ $brand_count[0]->brand_count }}</td>     
+					<td class="col-sm-2"><a class="edit-brand edit-brand-link" href="{{ url('brand/edit/')}}/{{ $brand->brand_id }}" data-bid="{{ $brand->brand_id }}" data-bn="{{ $brand->brand_name }}" data-val="{{$brand->brand_count}}">Edit</a></td>     
 				  </tr>
 				  </div>
 				  @endforeach	
