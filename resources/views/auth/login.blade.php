@@ -6,7 +6,7 @@
 {!! HTML::style('css/login-styles.css') !!}
 @endsection
 
-@section('content')}
+@section('content')
 <div class="container-fluid">	
     <div class="row">
 		<div class="col-md-offset-1 col-md-7">
