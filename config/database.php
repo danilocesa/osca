@@ -86,13 +86,13 @@ return [
         ],
 
 		'oracle' => [
-			'driver' => 'oracle',
-			'host' => '10.111.122.120',
-			'port' => '1521',
-			'database' => 'oscadb',
-			'username' => 'OSCA',
-			'password' => 'Gr33nt3a',
-			'charset' => 'AL32UTF8',
+			'driver' => '',
+			'host' => '',
+			'port' => '',
+			'database' => '',
+			'username' => '',
+			'password' => '',
+			'charset' => '',
 			'prefix' => '',
 		]
     ],
